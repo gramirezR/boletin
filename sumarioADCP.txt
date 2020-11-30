@@ -1,0 +1,92 @@
+ADP Summary
+-----------
+
+* Instrument:         adcp
+* Serial number:      24227
+* Firmware version:   52.40
+* Source filename:    ``D:\DHN\Depto_oceanografia\ILO\yessica\CARRASCO 2019\ADCP300 PTO ILO\PUERTO ILO\ADCP300001_000000.ENS``
+* Location:           unknown latitude, unknown longitude
+* Number of profiles: 400 
+* Number of cells:    100 
+* Number of beams:    4 
+* Cell size:          1 m
+* Summary of times between profiles:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  18.11   18.20   18.29   18.26   18.30   18.89 
+* Frequency:          300 kHz
+* Ensemble Numbers:    [1:4002]: 1, 2, ..., 4001, 4002
+* Cells:              100, centered at 3.110 m to 102.110 m, spaced by 1.000 m
+* Coordinate system:  beam [originally], xyz [presently]
+* Beams::
+    Number:           4 
+    Slantwise Angle:  20 
+    Orientation:      downward:4002 
+    Unspreaded:       FALSE 
+* Transformation matrix::
+      1.462   -1.462    0.000    0.000 
+      0.000    0.000   -1.462    1.462 
+      0.266    0.266    0.266    0.266 
+      1.034    1.034   -1.034   -1.034 
+* Time ranges from 2019-06-27 13:34:38 to 2019-06-27 15:36:02 with 400 samples and mean increment 18.25512 s
+* Data Overview
+
+                                            Min.      Mean    Max.      Dim.  NAs OriginalName
+    distance [m]                            3.11     52.61  102.11       100    0            -
+    v [m/s]                              -21.415 -0.019567  19.167 400x100x4 3228            -
+    q                                         22     110.3     156 400x100x4    0            -
+    a                                         65    124.07     223 400x100x4    0            -
+    g                                          0    85.956     100 400x100x4    0            -
+    br                                    45.799     93.57  120.62     400x4    0            -
+    bv                                   -27.799 0.0049681  4.7643     400x4    0            -
+    bc                                      50.3    251.47     255     400x4    0            -
+    ba                                      16.8    75.815    94.6     400x4    0            -
+    bg                                        20    99.794     100     400x4    0            -
+    pressure [dbar]                            0         0       0       400    0            -
+    temperature [°C, ITS-90]              16.568    16.889  17.221       400    0            -
+    salinity [PSS-78]                         35        35      35       400    0            -
+    depth [m]                                  6         6       6       400    0            -
+    soundSpeed [m/s]                        1512    1512.7    1514       400    0            -
+    heading [°]                           60.335    137.06   214.5       400    0            -
+    pitch [°]                            0.11535   0.98238  2.4362       400    0            -
+    roll [°]                               0.392    1.6402   2.435       400    0            -
+    headingStd [°]                             0         0       0       400    0            -
+    pitchStd [°]                               0         0       0       400    0            -
+    rollStd [°]                                0         0       0       400    0            -
+    pressureStd                                0         0       0       400    0            -
+    xmitCurrent                              255       255     255       400    0            -
+    xmitVoltage                            229.5    254.94     255       400    0            -
+    ambientTemp                               76    94.806      95       400    0            -
+    pressurePlus                           178.5    254.81     255       400    0            -
+    pressureMinus                            153    254.75     255       400    0            -
+    attitudeTemp                              44    82.196      88       400    0            -
+    attitude [°]                            51.6    128.81     129       400    0            -
+    contaminationSensor                     47.7    158.72     159       400    0            -
+    avgSpeed                              0.0708    2.1344   5.385       400    0            -
+    avgMagnitudeVelocityEast             -4644.9   -155.37  4537.5       400    0            -
+    avgMagnitudeVelocityNorth            -3003.8   -491.79   627.6       400    0            -
+    avgTrackMagnetic                      -30975   -3472.4   30038       400    0            -
+    avgTrackTrue                          -29235   -4022.3   29108       400    0            -
+    avgTrueVelocityEast                  -4661.2   -111.14  4755.2       400    0            -
+    avgTrueVelocityNorth                 -2685.9   -503.68   334.4       400    0            -
+    directionMadeGood                    -161.33   -21.734  159.33       400    0            -
+    firstLatitude                        -17.634   -17.611   -17.6       400    0            -
+    firstLongitude                       -71.433   -71.401 -71.372       400    0            -
+    lastLatitude                         -17.634   -17.611   -17.6       400    0            -
+    lastLongitude                        -71.433   -71.401 -71.372       400    0            -
+    numberOfHeadingSamplesAveraged             0         0       0       400    0            -
+    numberOfMagneticTrackSamplesAveraged     1.8    1.8257       2       400    0            -
+    numberOfPitchRollSamplesAveraged           0         0       0       400    0            -
+    numberOfSpeedSamplesAveraged             1.8    1.8257       2       400    0            -
+    numberOfTrueTrackSamplesAveraged         1.8    1.8257       2       400    0            -
+    primaryFlags                           16382     16382   16382       400    0            -
+    shipHeading                             -174   -46.031  172.36       400    0            -
+    shipPitch                                  0         0       0       400    0            -
+    shipRoll                                   0         0       0       400    0            -
+    speedMadeGood                         0.0632    2.1322  5.3804       400    0            -
+    speedMadeGoodEast                    -4.6552  -0.11023  4.7773       400    0            -
+    speedMadeGoodNorth                   -2.6949  -0.50354  0.3461       400    0            -
+
+* Processing Log
+    - 2020-07-01 00:54:00 UTC: `create 'adp' object`
+    - 2020-07-01 00:54:04 UTC: `adpEnsembleAverage(x = adcp.datos, n = 10, leftover = FALSE,     na.rm = TRUE)`
+    - 2020-07-01 00:54:04 UTC: `beamToXyzAdp(x = x)`
