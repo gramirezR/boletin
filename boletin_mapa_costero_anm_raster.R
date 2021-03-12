@@ -6,6 +6,7 @@ boletin_mapa_costero_anm_raster <- function(lista = archivos,
   
   require('raster')
   require('RNetCDF')
+  require('ggquiver')
   source('herramientas.R')
   narchs <- length(lista)
   graphics.off()
@@ -13,7 +14,8 @@ boletin_mapa_costero_anm_raster <- function(lista = archivos,
   ##################################################
   
   anm <- vector(mode='list',length=narchs)
-  
+  ugeos <- vector(mode='list',length=narchs)
+  vgeos <- vector(mode='list',length=narchs)
   for (ii in 1:narchs){
     
       tryCatch({
@@ -21,7 +23,9 @@ boletin_mapa_costero_anm_raster <- function(lista = archivos,
     longitud <- var.get.nc(ncConn,variable='longitude')
      latitud <- var.get.nc(ncConn,variable='latitude')
     indc.lat <- which(  latitud>=limites.lat[1] &  latitud<=limites.lat[2])
-    datos <- var.get.nc(ncConn,'sla')*1.0e-2
+    datos <- var.get.nc(ncConn,'sla', unpack = TRUE)
+    ugosa <- var.get.nc(ncConn,'ugosa', unpack = TRUE)
+    vgosa <- var.get.nc(ncConn,'vgosa', unpack = TRUE)
          if (!any(longitud<0)) {
             cuales.puntos <- longitud>=limites.lon[1] & longitud<=limites.lon[2]
                  indc.lon <- which( cuales.puntos)
@@ -33,33 +37,46 @@ boletin_mapa_costero_anm_raster <- function(lista = archivos,
                  indc.lon <- which( cuales.puntos)
                  indc.lon <- indc.lon[order(longitud[indc.lon])]
      }
+    
     mapa <- pasar.aRaster(datos[indc.lon,indc.lat],longitud[indc.lon],latitud[indc.lat])
+    U <- pasar.aRaster(ugosa[indc.lon,indc.lat],longitud[indc.lon],latitud[indc.lat])
+    V <- pasar.aRaster(vgosa[indc.lon,indc.lat],longitud[indc.lon],latitud[indc.lat])
     close.nc(ncConn)
    
     anm[[ii]] <- mapa
-    rm(list=c('mapa','datos'))
+    ugeos[[ii]] <- U
+    vgeos[[ii]] <- V
+    rm(list=c('mapa','datos','U','V','ugosa','vgosa'))
 },error=function(e) e,finally=print(ii))
   }
   
   x.raster <- do.call(what=stack,args=anm)
   crs(x.raster) <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
-  
   promedio <- stackApply(x.raster,indices = rep(1,nlayers(x.raster)),fun='mean',na.rm = TRUE)
   
+  x.raster <- do.call(what=stack,args=ugeos)
+  crs(x.raster) <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+  U <- stackApply(x.raster,indices = rep(1,nlayers(x.raster)),fun='mean',na.rm = TRUE)  
+  
+  x.raster <- do.call(what=stack,args=vgeos)
+  crs(x.raster) <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+  V <- stackApply(x.raster,indices = rep(1,nlayers(x.raster)),fun='mean',na.rm = TRUE)
   # promedio <- calc(x.raster,fun = mean,na.rm=TRUE)
   
   
-  # rm('anm')
+  rm(list=c('anm','ugeos','vgeos') )
   # windows()
   # plot(promedio)
   # # 
   ################################################# 
   
   mapa <- raster2ggplot(promedio)
+  mapa$z <- 100*mapa$z
+  velgeos <- raster2ggplot(U)
+  names(velgeos) <- c('lat','lon','U')
   
+  velgeos$V <- raster2ggplot(V)$z
   etqt.fecha <- paste0(format(fecha.anterior,'%d-%B-%Y'),' al ',format(fecha.actual,'%d-%B-%Y'))
-  ###############################
-
   ###### LINEA DE COSTA-----------------
   
   rango.lon <- abs(diff(limites.lon))
@@ -68,11 +85,19 @@ boletin_mapa_costero_anm_raster <- function(lista = archivos,
     marcas_y      <- seq(limites.lat[1],limites.lat[2],by=5)
     niveles       <- seq(-40,40,by=5)
     niveles.barra <- seq(-40,40,by=5)
+    velgeos <- velgeos[seq(from=1,to=length(velgeos$U), by = 27), ]
+    mag <- sqrt(velgeos$U^2 + velgeos$V^2)
+    velgeos$U <- velgeos$U/mag
+    velgeos$V <- velgeos$V/mag
+    vectsize <- 5
+    sizeV <- 0.4
   }else{
     load('costa_Peru_202.RDat') 
     marcas_y      <- seq(-20,5,by=5)
     niveles       <- seq(-30,30,by=1)
     niveles.barra <- seq(-30,30,by=5)
+    vectsize <- 5
+    sizeV <- 0.5
   }
   paleta_color <- cptcity::cpt('ncl_amwg_blueyellowred')
   
@@ -103,6 +128,11 @@ boletin_mapa_costero_anm_raster <- function(lista = archivos,
   pp <- pp + scale_fill_gradientn(colours= paleta_color,breaks=niveles.barra,limits =range(niveles))
   pp <- pp + geom_contour(data=mapa, aes(x=lon,y=lat,z=z),breaks=niveles,
                           col='grey45' ,inherit.aes=FALSE )
+  
+  pp <- pp + geom_quiver(data=velgeos,aes(x=lon,y=lat,u=U,v=V),
+                         vecsize = vectsize,
+                         size = sizeV,inherit.aes = FALSE)
+
   
   pp <- pp + geom_polygon( data=shore,aes(x=long,y=lat,group=group),
                            color = 'black', fill = 'grey80',inherit.aes=FALSE  )

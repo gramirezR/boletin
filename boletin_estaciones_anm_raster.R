@@ -5,8 +5,8 @@ boletin_estaciones_anm_raster <- function(lista,puntos,fecha.anterior,fecha.actu
   narchs <- length(lista)
   
   
-  region.lat <- c(-10,5)
-  region.lon <- c(-100,-75) + 360
+  region.lat <- c(-20,5)
+  region.lon <- c(-100,-70) + 360
   
   #### DDELIMITAR LA ZONA
   
@@ -67,12 +67,14 @@ boletin_estaciones_anm_raster <- function(lista,puntos,fecha.anterior,fecha.actu
 balta <-  raster::extract(x.raster,t(as.matrix(puntos$balta)),layer=1,nl=nlayers(x.raster))
 chimbote <-  raster::extract(x.raster,t(as.matrix(puntos$chimbote)),layer=1,nl=nlayers(x.raster),method='bilinear')
 talara <-  raster::extract(x.raster,t(as.matrix(puntos$talara)),layer=1,nl=nlayers(x.raster))
+mollendo <- raster::extract(x.raster,t(as.matrix(puntos$mollendo)),layer=1,nl=nlayers(x.raster))
 ###########################################################
   
-anm <- rbind( t(balta) , t(chimbote) , t(talara)  )
-est <- t(cbind( t(rep('Galapagos',nlayers(x.raster))),
+anm <- rbind( t(balta) , t(chimbote) , t(talara), t(mollendo)  )
+est <- t(cbind(t(rep('Galapagos',nlayers(x.raster))),
               t(rep('Chimbote',nlayers(x.raster))),
-              t(rep('Talara',nlayers(x.raster)))))
+              t(rep('Talara',nlayers(x.raster))),
+              t(rep('Mollendo',nlayers(x.raster))) ) )
 
 #################################
 
@@ -83,8 +85,10 @@ grafica <- data.frame(    T = as.POSIXct(tie,origin='1950-01-01'),
 
  pp <- ggplot(data=grafica,aes(x=T,y=anm,colour=EST))
  pp <- pp + geom_path(size=1.5)
- pp <- pp + scale_color_manual(name='ESTACIÓN',values=c('Galapagos'='red','Talara'='blue','Chimbote'='green'))
- pp <- pp + theme_bw() + scale_x_datetime(date_breaks = '1 week',labels = waiver())
+ pp <- pp + scale_color_manual(name='ESTACIÓN',values=c('Galapagos'='red',
+                                                        'Talara'='blue','Chimbote'='green',
+                                                        'Mollendo'='cyan'))
+ pp <- pp + theme_bw() + scale_x_datetime(date_breaks = 'month',labels = waiver())
  pp <- pp + labs(x= 'Fecha',y='Anomalía nivel del mar (cm)',
                  title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
                               'Dpto. de Oceanografía - Div. Oceanografía'),

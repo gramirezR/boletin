@@ -1,6 +1,6 @@
 
 boletin_hovmoller_anm_raster <- function( lista, poligono,limite.lon,
-                                   limite.lat,fecha.anterior,fecha.actual,franja ){
+                                   limite.lat,fecha.anterior,fecha.actual,franja, filtro ){
 
 ########
 # cat("\014") 
@@ -106,12 +106,12 @@ require('metR')
   hovmoller <- data.frame( tiempo = malla$tiempo,
                            lat = as.matrix(malla$lat),
                            anm = as.matrix(Z$values)  )
-  
+
   nuevoRaster <- hovmoller[,c('tiempo','lat')]
   cualNa <- which(is.na(hovmoller$anm))
   if (length(cualNa)>0){
     hovmoller <- hovmoller[-cualNa,] 
-  }
+    
   suave <- gam(anm ~ te(lat,tiempo,k=c(20,20)),data = hovmoller)
    pred <- predict(suave,newdata = nuevoRaster)
       Z <- as.matrix( pred )
@@ -119,7 +119,7 @@ require('metR')
   hovmoller <- data.frame(  tiempo = malla$tiempo,
                                lat = as.matrix(malla$lat),
                                anm = as.matrix(Z))
-
+}
   # promedios <- aggregate(hovmoller$anm, list(hovmoller$tiempo), mean, na.rm=TRUE)
   # 
   # desv_sd <-  aggregate(hovmoller$anm, list(hovmoller$tiempo), sd, na.rm=TRUE)
@@ -129,12 +129,19 @@ require('metR')
   #    hovmoller$anm[indc] <- (hovmoller$anm[indc] - promedios$x[ii]) / desv_sd$x[ii]
   #    }
 
-  
-  promedios <- mean(hovmoller$anm, na.rm=TRUE)
-  desv_sd <- sd(hovmoller$anm, na.rm=TRUE)
-
-  hovmoller$anm <- (hovmoller$anm - promedios)/ desv_sd
-  
+  if (filtro){
+     promedios <- mean(hovmoller$anm, na.rm=TRUE)
+     desv_sd <- sd(hovmoller$anm, na.rm=TRUE)
+     hovmoller$anm <- (hovmoller$anm - promedios)/ desv_sd
+     niveles <- seq(-3,3,by=0.25)
+     niveles2 <- seq(-3,3,by=0.5)
+     arch_fin = '_filtro'
+  }
+  else{
+    niveles <- seq(-40,40,by=2)
+    niveles2 <- seq(-40,40,by=5)
+    arch_fin = ''
+  }
   saveRDS(object = 'promedios', file = 'E:/programasR/promedioANM_2019-2020.RDS' )
   saveRDS(object = 'desv_sd', file = 'E:/programasR/promedioANM_2019-2020.RDS' )
   
@@ -146,7 +153,7 @@ require('metR')
   
   #########################
   paleta_color <- cptcity::cpt('ncl_amwg_blueyellowred')
-  niveles <- seq(-3,3,by=0.25)
+
   
   marcas_y <- seq(from=limite.lat[1],to=limite.lat[2],by=2)
   etiquetas_y <- unlist(lapply( as.vector(marcas_y),
@@ -155,7 +162,7 @@ require('metR')
   pp <- pp + geom_raster(aes(fill = anm),interpolate=TRUE,show.legend = TRUE  )
   pp <- pp + scale_fill_gradientn(colours = paleta_color,
                                   limits =range(niveles),
-                                  breaks = seq(-3,3,by=0.25))
+                                  breaks = niveles2)
   pp <- pp + stat_contour(data=hovmoller, aes(x=tiempo,y=lat,z=anm),
                           breaks = niveles,col='black' ,inherit.aes=FALSE )
   
@@ -175,7 +182,7 @@ require('metR')
   pp <- pp + labs(x='Fecha',y='Latitud',
                   title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
                                'Dpto. de Oceanografía - Div. Oceanografía'),
-                  subtitle=paste0('Anomalía del nivel del Mar normalizada: del ',
+                  subtitle=paste0('Anomalía del nivel del Mar: del ',
                                   format(fecha.anterior,'%B-%d-%Y'),' a ',
                                   format(fecha.actual,'%B-%d-%Y'),'\nFranja de ',franja,' millas'),
                   caption=paste0('Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)','\nClimatología: 1993-2012'))

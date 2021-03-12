@@ -64,6 +64,7 @@ boletin_estaciones_anm <- function(lista,puntos,fecha.anterior,fecha.actual){
 save(file = 'datosNivel.Rdata',guardar)   
 
  pp <- ggplot(data=grafica,aes(x=T,y=anm,colour=EST))
+ pp <- pp + scale_x_datetime(breaks = 'month')
  pp <- pp + geom_path(size=1.5)
  pp <- pp + scale_color_manual(name='ESTACIÓN',values=c('Galapagos'='red','Talara'='blue','Chimbote'='green'))
  pp <- pp + theme_bw()

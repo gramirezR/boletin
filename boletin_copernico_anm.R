@@ -1,4 +1,4 @@
-## PROCESAMIENTO DE ANOMALÍA DE NIVEL DE MAR DE COPERNICO
+## PROCESAMIENTO DE ANOMAL?A DE NIVEL DE MAR DE COPERNICO
 #
 #
 
@@ -30,14 +30,36 @@ gshhs.dir <- 'E:/programasR/gshhg-bin-2.3.7/'
        # hoy <- lubridate::today() 
        # 
        # dia.uno <- lubridate::yday(hoy)
- fecha.referencia <- as.Date('2020-11-01') 
- fecha.actual <- lubridate::today() 
- dias.atras <- as.numeric(fecha.actual - fecha.referencia )#lubridate::day( fecha.actual) - 1
+ fecha.inicial <- as.Date('2021-02-01') 
+ fecha.final <- lubridate::today() - 1
+ dias.atras <- as.numeric(fecha.final - fecha.inicial )#lubridate::day( fecha.actual) - 1
  
-periodo <- 'semanal'     
-dias <- seq(from=fecha.referencia,to=fecha.actual,by='7 days')
+periodo <- 'semanal'
 
-dias.atras.hov <- 30*6 + 1
+
+if (periodo == 'semanal'){
+   dias <- seq(from=fecha.inicial,to=fecha.final,by='7 days')
+   if ((lubridate::day(fecha.final)-lubridate::day(fecha.inicial))%%7>0){
+      dias <- c(dias, fecha.final)
+   }
+}else{
+   intervalo <- paste(lubridate::day(fecha.final)-1,'days')
+   dias <- seq(from=fecha.inicial,to=fecha.final,by=intervalo)
+}
+
+dias.atras.hov <- 30*6 + 2 
+
+############ POL?GONO PARA GR?FICOS COSTEROS ###############
+
+load('E:/programasR/boletin/peru_poli_50mi.RData')
+
+poli50 <- costa@polygons[[1]]@Polygons[[1]]@coords
+
+poli50 <- as.data.frame(poli50)
+
+names(poli50) <- c('lon','lat')
+
+##########################################
 
 for (ii in 1:( length(dias) - 1 ) ){
   
@@ -52,7 +74,7 @@ for (ii in 1:( length(dias) - 1 ) ){
 
     #fecha.actual <- as.Date('2019-03-03')
     
-fecha.anterior <- fecha.actual - dias.atras + 1# en días
+fecha.anterior <- fecha.actual - dias.atras + 1# en d?as
 
 ###### BAJAR DATOS DE COPERNICO ########
 prueba <- FALSE
@@ -71,16 +93,8 @@ boletin.dir <- salida[[2]]
 rm(salida)
 save(file='lista_anm.Rdata',list=c('archivos','boletin.dir'))
 }
-############ POLÍGONO PARA GRÁFICOS COSTEROS ###############
 
-load('E:/programasR/boletin/peru_poli_50mi.RData')
-
-poli50 <- costa@polygons[[1]]@Polygons[[1]]@coords
-
-poli50 <- as.data.frame(poli50)
-
-names(poli50) <- c('lon','lat')
-####### LISTA PARA GENERAR GRÁFICOS DE FECHAS ANTERIORES #######
+####### LISTA PARA GENERAR GR?FICOS DE FECHAS ANTERIORES #######
 
 dias.archivo <- sort( unique(unlist(
                       lapply(archivos,function(x) format(as.Date(substring(x,68,75),format='%Y%m%d'),'%Y%m%d')  )
@@ -121,6 +135,8 @@ mapa_costero <- boletin_mapa_costero_anm_raster(lista = lista.sinRep,
 png(filename = paste0(boletin.dir,'mapa_ecuatorial_anm_',periodo,fecha.actual,'.png'),width=2400,height=850)
 plot(mapa_costero)
 dev.off()
+
+###################
 }
 
 #  ##################################
@@ -179,9 +195,9 @@ dev.off()
    boletin.dir <- salida[[2]]
    rm(salida)
    save(file='lista_anm.Rdata',list=c('archivos','boletin.dir'))
- }
+ } 
  #############################
- fecha.anterior <- fecha.actual - dias.atras # en días
+ fecha.anterior <- fecha.actual - dias.atras # en d?as
  
  dias.archivo <- sort( unique(unlist(
    lapply(archivos,function(x) format(as.Date(substring(x,68,75),format='%Y%m%d'),'%Y%m%d')  )
@@ -204,7 +220,8 @@ dev.off()
  source('E:/programasR/boletin/boletin_estaciones_anm_raster.R')
  posicion <- data.frame(    balta = c(-90.283333+360,-0.433333),
                             talara = c(-81.283+360,-4.617),
-                            chimbote = c(-78.633+360,-9.083))
+                            chimbote = c(-78.633+360,-9.083),
+                            mollendo = c(-72.017964+360,-17.035183))
  
  estaciones.anm <- boletin_estaciones_anm_raster(lista=lista.sinRep,
                                                  posicion,
@@ -236,9 +253,10 @@ png(file=paste0(boletin.dir, 'hovmoller_anm_ecuatorial_', lubridate::today(), '.
                                              limite.lon = c(-90, -70),
                                              limite.lat = c(-20, 2),
                                                   fecha.anterior,
-                                                  fecha.actual,'50')
+                                                  fecha.actual,'50',
+                                             filtro =1)
  
- png(filename = paste0(boletin.dir,'Hovmoller_anomalia_anm_',fecha.actual,'.png'),width=2400,height=1200)
+ png(filename = paste0(boletin.dir,'Hovmoller_anomalia_anm_',fecha.actual,'_filtro.png'),width=2400,height=1200)
  plot(hovmoller_costero_50)
  dev.off()
 ############ HOVMOLLER 50 - 200 MILLAS ###############
@@ -251,9 +269,10 @@ png(file=paste0(boletin.dir, 'hovmoller_anm_ecuatorial_', lubridate::today(), '.
                                                   limite.lon = c(-90, -70),
                                                   limite.lat = c(-20, 2),
                                                   fecha.anterior,
-                                                  fecha.actual,'50 A 200')
+                                                  fecha.actual,'50 A 200',
+                                                  filtro = 1)
 
- png(filename = paste0(boletin.dir,'Hovmoller_anomalia_anm_50-200_',fecha.actual,'.png'),width=2400,height=1200)
+ png(filename = paste0(boletin.dir,'Hovmoller_anomalia_anm_50-200_',fecha.actual,'_filtro.png'),width=2400,height=1200)
  plot(hovmoller.costero_50_200)
  dev.off()
 

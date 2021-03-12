@@ -22,7 +22,7 @@ library('ggquiver')
 raiz <- 'E:/boletin/'
 setwd(raiz)
 gshhs.dir <- 'E:/programasR/gshhg-bin-2.3.7/'
-############### DEFINICIÓN DEL POLÍGONO #################33
+############### DEFINICI?N DEL POL?GONO #################33
 franja <- '50'
 if (is.na(as.numeric(franja))){
   load('E:/programasR/boletin/peru_poli_ENFEN.RData')
@@ -34,7 +34,7 @@ cualPoli <- costa@polygons[[1]]@Polygons[[1]]@coords
 
 dias.atras <- 180
 fecha.actual <- lubridate::today() - 2
-fecha.anterior <- fecha.actual - dias.atras# en días
+fecha.anterior <- fecha.actual - dias.atras# en d?as
 prueba <- FALSE
 
 lista.dias <- seq(from=fecha.anterior,to=fecha.actual,by='day')
@@ -46,6 +46,10 @@ anio <- lubridate::year(lista.dias)
 mes <- formatC(lubridate::month(lista.dias),width=2,flag=0)
 fechas <- unique(paste0(anio,'/',mes))
 figuras <- paste0('E:/boletin/viento/',lubridate::year(fecha.actual),'/figuras/')
+
+if (!dir.exists(figuras)){
+  dir.create(figuras)
+}
 
 if (!dir.exists(datos.dir )){
   dir.create(datos.dir ,recursive = TRUE)
@@ -90,7 +94,7 @@ lista.archs <- lista.archs[-(1:diasInd)]
 }
 ##############################################
 # lista.archs <- list.files(path=datos.dir,full.names = TRUE)
-####### POLÍGONOS PARA HOVMOLLER ###############
+####### POL?GONOS PARA HOVMOLLER ###############
 # load('E:/programasR/boletin/peru_poli_ENFEN.RData')# variable costa
 # poli50_200 <- costa@polygons[[1]]@Polygons[[1]]@coords
 #load('C:/Users/gramirez/programasR/boletin/peru_poli_viento.RData')
@@ -145,7 +149,7 @@ kk <- 1
 
 for (ii in 1:length(dias.arch)){
   indc.dia <- grep(pattern=paste0('/',dias.arch[ii]),x=lista.archs)
-  falla <- 0
+  .GlobalEnv$falla <- 0
   for (jj in 0:(length(indc.dia)-1)){
     if (kk<length(lista.archs)){
       tryCatch({
@@ -153,8 +157,10 @@ for (ii in 1:length(dias.arch)){
         u <- ncvar_get(ncin,'eastward_wind')[cuales.lon,cuales.lat] + u
         v <- ncvar_get(ncin,'northward_wind')[cuales.lon,cuales.lat] + v
         nc_close(ncin)},
-        error=function(e) {e
-          falla <- falla+1 
+        error=function(e) {
+          print(lista.archs[kk])
+          file.remove(lista.archs[kk])
+          .GlobalEnv$falla <- .GlobalEnv$falla+1 
         },finally = {kk <- kk + 1}  )
     }else{
       break
@@ -162,7 +168,7 @@ for (ii in 1:length(dias.arch)){
     
   }
   ################# 
-  nbuenos <- length(indc.dia) - falla
+  nbuenos <- length(indc.dia) - .GlobalEnv$falla
   
   if (nbuenos>0){
     u <- u/nbuenos
@@ -171,8 +177,8 @@ for (ii in 1:length(dias.arch)){
     X <- malla$lon[indc]
     Y <- malla$lat[indc]
     Z <- Magnitud[indc] - Prom[indc]
-    U <- u-u_p[indc]
-    V <- v-v_p[indc]
+    U <- u - u_p[indc]
+    V <- v - v_p[indc]
     for ( qq in 1:length(latitudes)){
       indc2 <- Y==latitudes[qq]
       datos.M[qq,ii] = mean( Z[indc2],na.rm=TRUE  )
@@ -219,26 +225,27 @@ if (length(indNa)>0){
   V <- V
 }
 
+# malla <- malla2
+nSerie <- length(malla$tiempo)
 interpolar <- data.frame( tiempo = malla2$tiempo,
                              lat = malla2$lat,
-                             mag = Z,
-                               u = U,
-                               v = V)
+                              mag = Z,
+                                u = U,
+                                v = V)
 
- rm(list=c('U','V','Z'))
-nSerie <- length(malla$tiempo)
- 
-suave <- gam(mag ~ te(tiempo,lat,k=c(50,10)),data = interpolar)
- pred <- predict(suave,newdata = as.data.frame(malla))
-    Z <- stack( pred )$value
+  rm(list=c('U','V','Z'))
 
-suave <- gam(u ~ te(tiempo,lat,k=c(50,10)),data = interpolar)
- pred <- predict(suave,newdata = as.data.frame(malla))
-    U <- stack( pred )$values
+ suave <- gam(mag ~ te(tiempo,lat,k=c(50,10)),data = interpolar)
+  pred <- predict(suave,newdata = as.data.frame(malla))
+     Z <- stack( pred )$value
 
-suave <- gam(v ~ te(tiempo,lat,k=c(50,10)),data = interpolar)
- pred <- predict(suave,newdata = as.data.frame(malla))
-    V <- stack( pred )$values
+ suave <- gam(u ~ te(tiempo,lat,k=c(50,10)),data = interpolar)
+  pred <- predict(suave,newdata = as.data.frame(malla))
+     U <- stack( pred )$values
+
+ suave <- gam(v ~ te(tiempo,lat,k=c(50,10)),data = interpolar)
+  pred <- predict(suave,newdata = as.data.frame(malla))
+     V <- stack( pred )$values
 
 ######
 hovmoller <- data.frame(   tiempo = as.Date(malla$tiempo,origin='1970-01-01'),
@@ -256,7 +263,7 @@ hovmoller$v <- hovmoller$v/mag
   rm(list=c('Z','U','V','interpolar'))
 
 ######### DIAGRAMA DE HOVMOLLER ################
- poner <- seq(from=1,to=nSerie,length.out = 5000  )
+ poner <- seq(from=1,to=nSerie,length.out = 6500  )
 if (exists('pp')){
   rm(pp)
 }
@@ -278,7 +285,8 @@ paleta_color <- cptcity::cpt('ncl_amwg_blueyellowred')
 niveles <- seq(from=-8,to=8,by=1)
 if (is.na(as.numeric(franja))){
   franja <- str_replace_all('50 a 200',pattern = ' ',replacement = '_')
-  }
+}
+
 png(filename = paste0(figuras,'Hovmoller_aviento_',fecha.actual,'_',franja,'millas.png'),
               width=2400,height=1000)
 pp <- ggplot( data=hovmoller,aes(x = tiempo,y = lat,fill = anm) )

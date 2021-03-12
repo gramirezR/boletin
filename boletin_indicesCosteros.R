@@ -1,4 +1,4 @@
-indicesCosteros <- function(TSM,ATSM){
+indicesCosteros <- function(TSM,ATSM,TSM34,ATSM34){
 
 
 
@@ -14,6 +14,14 @@ indicesCosteros <- function(TSM,ATSM){
   
   nSeccionesATSM <- length(ATSM_por_tiempo)
   nSeccionesTSM <- length(TSM_por_tiempo)
+  
+  ATSM_por_tiempo_34 <- split(ATSM34$data,
+                           cut(ATSM34$data$tiempo,breaks = as.numeric(levels(factor(ATSM34$data$tiempo)))))
+  
+  TSM_por_tiempo_34 <- split(TSM34$data,
+                          cut(TSM34$data$tiempo,breaks = as.numeric(levels(factor(TSM34$data$tiempo)))))
+  
+  
   
   promediosNorte <- mapply(function(x,y){
     zonaNorte <- c(-8.24,-3)
@@ -32,15 +40,24 @@ indicesCosteros <- function(TSM,ATSM){
     indc <- which( x$lat >= zonaSur[1] & x$lat<=zonaSur[2]  )
     mean(x$atsm[indc]/sd(y$atsm[indc],na.rm=TRUE),na.rm=TRUE)
   },x= ATSM_por_tiempo,y=TSM_por_tiempo)
+  
+  promedio34 <- mapply(function(x,y){
+    zona34 <- c(-5,5)  
+    indc <- which( x$lat >= zona34[1] & x$lat<=zona34[2]  )
+    mean(x$atsm[indc]/sd(y$atsm[indc],na.rm=TRUE),na.rm=TRUE)
+  },x= ATSM_por_tiempo_34,y=TSM_por_tiempo_34)
+  
+  
   #############################################################
   
  # promedios <- do.call(what = rbind,args = promediosNorte)
   T <-T[-1]
-  T <- c( T, T, T)
-  z <- c( promediosNorte, promediosCentro, promediosSur )
+  T <- c( T, T, T, T)
+  z <- c( promediosNorte, promediosCentro, promediosSur, promedio34 )
  zona <- factor(c( rep('norte', length(promediosNorte)),
-            rep('centro', length(promediosCentro)),
-            rep('sur', length(promediosSur))), levels=c('norte','centro','sur'))
+                   rep('centro', length(promediosCentro)),
+                   rep('sur', length(promediosSur)),
+                   rep('zona3.4', length(promedio34))), levels=c('norte','centro','sur','zona3.4'))
   
   promedios <- data.frame(T=T,indice = z, zona = zona )
   # promedios <- data.frame(T=T,indice = promediosCentro )

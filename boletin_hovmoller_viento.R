@@ -136,25 +136,24 @@ kk <- 1
 
 for (ii in 1:length(dias.arch)){
   indc.dia <- grep(pattern=paste0('/',dias.arch[ii]),x=lista.archs)
-  falla <- 0
+  .GlobalEnv$falla <- 0
   for (jj in 0:(length(indc.dia)-1)){
     if (kk<length(lista.archs)){
       tryCatch({
-        print(lista.archs[kk])
+        # print(lista.archs[kk])
         ncin <- nc_open(lista.archs[kk])
         u <- ncvar_get(ncin,'eastward_wind') + u
         v <- ncvar_get(ncin,'northward_wind') + v
         nc_close(ncin)},
-        error=function(e) {e
-          falla <- falla+1 
+        error=function(e) {
+          print(lista.archs[kk])
+          file.remove(lista.archs[kk])
+          .GlobalEnv$falla <- .GlobalEnv$falla + 1 
         },finally = {kk <- kk + 1}  )
-    }else{
-      break
     }
-    
   }
   
-  nbuenos <- length(indc.dia) - falla
+  nbuenos <- length(indc.dia) - .GlobalEnv$falla 
   
   if (nbuenos>0){
     u <- u/nbuenos
@@ -222,7 +221,10 @@ nSerie <- length(malla$tiempo)
 suave <- gam(mag ~ te(tiempo,lat,k=c(50,20)),data = interpolar)
  pred <- predict(suave,newdata = as.data.frame(malla))
     Z <- stack( pred )$values
-
+    indc <- which(Z<0)
+    Z[indc] <- 0
+    
+    
     suave <- gam(u ~ te(tiempo,lat,k=c(50,20)),data = interpolar)
     pred <- predict(suave,newdata = as.data.frame(malla))
     U <- stack( pred )$values
@@ -300,15 +302,15 @@ pp <- pp + guides( fill = guide_colorbar(barheight = unit(20, "cm"),
                                          barwidth = unit(2,'cm'),
                                          label.theme = element_text(size=28),
                                          title = 'm/s',title.theme = element_text(size=28)))
-pp <- pp + scale_x_date( breaks=seq.Date(from = fecha.anterior, 
-                                         to = fecha.actual, 
+pp <- pp + scale_x_date( breaks=seq.Date(from = fecha.anterior,
+                                         to = fecha.actual,
                                          by = "week"),
                          date_labels = '%b-%d',
-                         expand = c(0,0) ) 
+                         expand = c(0,0) )
 
 pp <- pp + scale_y_continuous(limits=c(-20,2),breaks = marcas_y  ,
                               expand = c(0,0),
-                              labels = etiquetas_y) 
+                              labels = etiquetas_y)
 
 plot(pp)
 

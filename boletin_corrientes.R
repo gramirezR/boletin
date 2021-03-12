@@ -3,7 +3,7 @@ graphics.off()
 rm(list=ls())
 
 # library('RNetCDF')
-setwd('D:/programasR/boletin/')
+setwd('E:/programasR/boletin/')
 library('stringr')
 library('tidyverse')
 library('scales')
@@ -15,35 +15,41 @@ library('RNetCDF')
 library('raster')
 library('ggquiver')
 
-setwd('D:/programasR/boletin/')
+setwd('E:/programasR/boletin/')
 source('herramientas.R')
 lugar <- 'Ecuador'
-raiz <- 'D:/boletin/datos/mercator/'
-figuras <- paste0(raiz,'figuras_Callao/')
+raiz <- 'E:/boletin/datos/mercator/'
+figuras <- paste0(raiz,'figuras_Tacna/')
 
 
 if(!dir.exists(figuras)){
   dir.create(figuras)
 }
 
-gshhs.dir <- 'D:/programasR/gshhg-bin-2.3.7/'
+gshhs.dir <- 'E:/programasR/gshhg-bin-2.3.7/'
 t0.copernico <- as.Date('1950-01-01') # segundos desde esta fecha
 # los archivos miden el tiempo en horas a partir de t0.Copernico 
-bajar <- FALSE
+bajar <- TRUE
 
-fecha.inicial <- as.Date('2008-01-01')
-fecha.final <- as.Date('2018-12-01') # en días
+fecha.inicial <- as.Date('2019-12-01')
+fecha.final <- as.Date('2020-01-01') # en d?as
+
+# ppr <- seq(fecha.inicial,fecha.final, by='day')
+# 
+# lapply(ppr,FUN=function(x){
+#   print( str_replace_all(string = str_sub(string = x,start = 1,7),pattern = '-',replacement = '/')  )
+# })
 
 if (bajar){
-  lista.archivos.ftp <- ruta.archivos(inicio=fecha.inicial,final=fecha.final,ruta=ruta.ftp)
-  bajar.archivos(lista.archivos.ftp,raiz)
+  lista.archivos.ftp <- ruta.archivos_mensual(inicio=fecha.inicial,final=fecha.final,ruta=ruta_ftp_diario)
+  bajar.archivos.Mercator(lista.archivos.ftp,raiz)
 }
 
 
 ##########################
 
 
-lista.archivos.local <- list.files(path=raiz,full.names = TRUE,pattern = '.+nc$')
+lista.archivos.local <- list.files(path='E:/boletin/datos/mercator/mensual/',full.names = TRUE,pattern = '.+nc$')
 
 # lista.archivos.local <- lista.archivos.local[-seq(1,6)]
 
@@ -51,16 +57,18 @@ narchs <- length(lista.archivos.local)
 
 ##########################
 
-ncConn <- open.nc(lista.archivos.local[1])
+ncConn <- open.nc(lista.archivos.local[2])
 print.nc(ncConn)
 close.nc(ncConn)
 
 #############################
 
-limite.lon <- c(-77.7,-76.7)
-limite.lat <- c(-12.3,-11.8)
+limite.lon <- c(-82,-81)
+limite.lat <- c(-5,-4)
 
-ncConn <- open.nc(lista.archivos.local[1])
+ii <- 2
+
+ncConn <- open.nc(lista.archivos.local[ii])
 longitud <- var.get.nc(ncConn,variable='longitude')
 latitud <- var.get.nc(ncConn,variable='latitude')
 indc.lon <- which( longitud>=limite.lon[1] & longitud<=limite.lon[2])
@@ -73,8 +81,8 @@ cuantos.lat <- length(indc.lat)
 inicio <- c(primer.lon,primer.lat,1,1)
 cuantos <- c(cuantos.lon,cuantos.lat,10,1)
 
-U <- promedio(ncConn,'uo',inicio,cuantos,factor.var=0.000610370188951492)
-V <- promedio(ncConn,'vo',inicio,cuantos,factor.var=0.000610370188951492)
+U <- promedio(ncConn,'uo_oras',inicio,cuantos)
+V <- promedio(ncConn,'vo_oras',inicio,cuantos)
 temporalU <- U*0
 temporalV <- V*0
 close.nc(ncConn)
@@ -101,9 +109,9 @@ for (jj in 1:12){
     tryCatch({  
       ncConn <- open.nc(lista.archivos.local[ii])
       
-      temporalU <- temporalU + promedio(ncConn,'uo',inicio,cuantos,factor.var=1)
+      temporalU <- temporalU + promedio(ncConn,'uo',inicio,cuantos)
       
-      temporalV <- temporalV + promedio(ncConn,'vo',inicio,cuantos,factor.var=1)
+      temporalV <- temporalV + promedio(ncConn,'vo',inicio,cuantos)
       # temporalU <- temporalU + pasar.aRaster(,longitud,latitud)
       # 
       # temporalV <- temporalV + pasar.aRaster(promedio(ncConn,'vo',inicio,cuantos,factor.var=0.000610370188951492),longitud,latitud)
@@ -112,8 +120,8 @@ for (jj in 1:12){
     )
   }
   
-  U[[jj]] <- pasar.aRaster(temporalU*0.000610370188951492/kk,longitud,latitud)
-  V[[jj]] <- pasar.aRaster(temporalV*0.000610370188951492/kk,longitud,latitud)
+  U[[jj]] <- pasar.aRaster(temporalU/kk,longitud,latitud)
+  V[[jj]] <- pasar.aRaster(temporalV/kk,longitud,latitud)
 }
 ################################
 
@@ -236,10 +244,10 @@ for (kk in 1:length(fronteras)){
  pp <- pp + coord_cartesian(xlim = limite.lon,ylim = limite.lat)
 
 pp <- pp + labs(x='Longitud',y='Latitud',
-                title=paste0('DIRECCIÓN DE HIDROGRAFÍA\n Y NAVEGACIÓN \n',
-                             'Dpto. de Oceanografía - Div. Oceanografía'),
+                title=paste0('DIRECCI?N DE HIDROGRAF?A\n Y NAVEGACI?N \n',
+                             'Dpto. de Oceanograf?a - Div. Oceanograf?a'),
                 subtitle = paste0('Campo de corrientes de ',mes.nombre[ii]),
-                caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT\n MONITORING SERVICE (CMEMS v3.0).\nClimatología: 2000-2018')
+                caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT\n MONITORING SERVICE (CMEMS v3.0).\nClimatolog?a: 2000-2018')
 
 pp <- pp + theme( axis.title.x = element_text( size=28,hjust=0.5  ),
                                    axis.title.y = element_text( size=28,hjust=0.5  ),
@@ -343,10 +351,10 @@ pp <- pp + scale_y_continuous(limits = c(-5,30),breaks = seq(from=0,to=30,by=10)
 
 pp <- pp + coord_polar(theta='x',start = -0.5*pi+(-22.5/2)*pi/180,direction = -1)
 
-pp <- pp + labs(x='',y='',title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                                       'Dpto. de Oceanografía - Div. Oceanografía'),
+pp <- pp + labs(x='',y='',title=paste0('DIRECCI?N DE HIDROGRAF?A Y NAVEGACI?N \n',
+                                       'Dpto. de Oceanograf?a - Div. Oceanograf?a'),
                 subtitle = paste0('Rosa de corrientes de ',mes.nombre[ii]),
-                caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatología: 2000-2018'
+                caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatolog?a: 2000-2018'
 )
 
 pp <- pp + annotate("text",
@@ -375,8 +383,8 @@ pp <- pp + theme( axis.text.x = element_text( size=16,face = 'bold' ),
                   plot.subtitle=element_text(size=14),
                   plot.caption = element_text(size = 12,hjust = 0),
                   legend.position = 'right')
-pp <- pp + labs(title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                             'Dpto. de Oceanografía - Div. Oceanografía'),
+pp <- pp + labs(title=paste0('DIRECCI?N DE HIDROGRAF?A Y NAVEGACI?N \n',
+                             'Dpto. de Oceanograf?a - Div. Oceanograf?a'),
                 subtitle=paste0('Corrientes para ',lugar,': ',meses[ii]),
                 caption=paste0('Fuente: NOAA\n
 ENVIRONMENTAL MODELLING CENTER\n
@@ -397,10 +405,10 @@ pp <- pp + scale_y_continuous(breaks = seq(from=0,to=1,by=0.1),
 pp <- pp + scale_x_continuous(breaks=seq(0,360,length.out = 17),
                               labels=etqts <- c('N','NNE','NE','ENE','E','ESE','SE','SSE','S',
                                                 'SSO','SO','OSO','O','ONO','NO','NNO','N'))
-pp <- pp + labs(x='Dirección',y='% Ocurrencia',title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                                       'Dpto. de Oceanografía - Div. Oceanografía'),
+pp <- pp + labs(x='Direcci?n',y='% Ocurrencia',title=paste0('DIRECCI?N DE HIDROGRAF?A Y NAVEGACI?N \n',
+                                       'Dpto. de Oceanograf?a - Div. Oceanograf?a'),
                 subtitle = paste0('Diagrama de ocurrencia del mes de ',mes.nombre[ii]),
-                caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT\n MONITORING SERVICE (CMEMS v3.0).\nClimatología: 2000-2018'
+                caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT\n MONITORING SERVICE (CMEMS v3.0).\nClimatolog?a: 2000-2018'
 )
 pp <- pp + theme(axis.text.x = element_text(size=20,face='bold'),
                  axis.text.y = element_text(size=20,face='bold'),
@@ -421,10 +429,10 @@ for(ii in 1:12){
   pp <- pp + scale_y_continuous(breaks = seq(from=0,to=1,by=0.1),
                                 labels=seq(from=0,to=1,by=0.1)*100)
   pp <- pp + scale_x_continuous(breaks=seq(from=0,to=0.2,by=0.02),limits = c(0,0.2))
-  pp <- pp + labs(x='Magnitud (m/s)',y='% Ocurrencia',title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                                                              'Dpto. de Oceanografía - Div. Oceanografía'),
+  pp <- pp + labs(x='Magnitud (m/s)',y='% Ocurrencia',title=paste0('DIRECCI?N DE HIDROGRAF?A Y NAVEGACI?N \n',
+                                                              'Dpto. de Oceanograf?a - Div. Oceanograf?a'),
                   subtitle = paste0('Diagrama de ocurrencia del mes de ',mes.nombre[ii]),
-                  caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatología: 2000-2018'
+                  caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatolog?a: 2000-2018'
   )
   pp <- pp + theme(axis.text.x = element_text(size=20,face='bold'),
                    axis.text.y = element_text(size=20,face='bold'),
@@ -436,3 +444,12 @@ for(ii in 1:12){
   plot(pp)
   dev.off()
 }
+ 
+ ########################
+ 
+ 
+ 
+ lat <-  4 + 33/60 + 40.60/3600
+ lon <- 81 + 18/60 + 26.31/3600
+ 
+ 

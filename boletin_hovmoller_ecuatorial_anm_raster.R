@@ -132,7 +132,6 @@ boletin_hovmoller_ecuatorial_anm_raster <- function(lista ,
      hovmoller <- data.frame(     T = malla.inter$T,
                                   lon = malla.inter$lon,
                                   anm = Z)
-  
   ############################################# 
   
   
@@ -160,8 +159,7 @@ boletin_hovmoller_ecuatorial_anm_raster <- function(lista ,
                                as.character(x)
                              }
                            }) )
-  #######      
-  
+  ######
   contornos <- seq( from=-30,to=30,by=2 )
   ######
   pp <- ggplot(data=hovmoller,aes(y=lon,x=T,fill=anm)) 

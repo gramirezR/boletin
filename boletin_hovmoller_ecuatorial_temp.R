@@ -89,7 +89,7 @@ hovmoller_ecuatorial_temp <- function(lista.archivos,variable,region.lon,region.
                           breaks = niveles,col='black' ,inherit.aes=FALSE )
  
   pp <- pp + geom_text_contour(data=hovmoller, aes(x=T,y=lon,z=anm),
-                               stroke = 0.15,skip=0,min.size =10,size=18,rotate = FALSE,
+                               stroke = 0.15,skip=0,min.size =10,size=14,rotate = FALSE,
                                breaks = niveles)
   
    # pp <- pp + geom_dl(data=hovmoller,aes(x=lon,y=T,z=anm,label=..level..),

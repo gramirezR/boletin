@@ -1,6 +1,6 @@
 mapa_costero_temp <- function(lista,variable,
                               limites.lon,limites.lat,
-                              fecha.anterior,fecha.actual ){
+                              fecha.anterior,fecha.actual, poner_boyas ){
   
   require('RNetCDF')
   require('tidyverse')
@@ -63,21 +63,30 @@ mapa_costero_temp <- function(lista,variable,
     npts <- 30
     tamanio <- 10
   }else{
-    load('costa_Peru_202.RDat') 
+    load('costa_Peru_202.RDat')
+    indc_shore <- which(shore$group==3.1)
+    indc <- which(point.in.polygon( mapa$lon,mapa$lat,
+                                    shore$lon[indc_shore],shore$lat[indc_shore])==1)
+    mapa <- mapa[-indc,]
     Dt <- 0.5
     npts <- 10
     tamanio <- 12
-   # if (fecha.anterior==fecha.actual){
       suave <- mgcv::gam(z~te(lon,lat,k=nodoSpline),data=mapa)
-      
       pred <- predict(suave,newdata = as.data.frame(malla))
+      indc <- which(point.in.polygon( malla$lon,malla$lat ,
+                                      shore$lon[indc_shore],shore$lat[indc_shore])==1)
       Z <- as.matrix( pred )
       mapa <- data.frame(     lon = malla$lon,
                               lat = malla$lat,
                               z = Z)
+      
+      mapa[indc,] = NA
       rm('pred')
       rm('suave')#}
   }
+  
+  
+  saveRDS(object = mapa,file = 'mapa.RDS')
   
   nfronteras <- length(fronteras)
   
@@ -85,20 +94,20 @@ mapa_costero_temp <- function(lista,variable,
   if (pracma::strcmp(variable,'analysed_sst' )){
     niveles <- seq(14,30,by=1)
     subtitulo.graf <- 'Temperatura Superficial del Mar'
-    titulo.barra <- 'TSM\n(°C)'
+    titulo.barra <- 'TSM\n(?C)'
   }else if( pracma::strcmp(variable,'sst_anomaly')){
     if (rango.lon>20){
       niveles <- seq(-6,6,by=1)
     }else {
       niveles <- seq(-6,6,by=0.5)
     }
-    subtitulo.graf <- 'Anomalía de la Temperatura Superficial del Mar'
-    titulo.barra <- 'ATSM\n(°C)'
+    subtitulo.graf <- 'Anomal?a de la Temperatura Superficial del Mar'
+    titulo.barra <- 'ATSM\n(?C)'
   }
   else{
     niveles <-seq(10,30,by=1)
     subtitulo.graf <-'Temperatura Superficial del Mar'
-    titulo.barra <- 'TSM\n(°C)'
+    titulo.barra <- 'TSM\n(?C)'
   }
   
   
@@ -145,22 +154,25 @@ mapa_costero_temp <- function(lista,variable,
                           col = 'black' ,
                           inherit.aes = FALSE,
                           breaks = niveles)
-  
-  pp <- pp + geom_text_contour(data=mapa, aes(x=lon,y=lat,z=z),
-                               stroke = 0.15,skip=0,min.size =npts,size=tamanio,rotate = FALSE,
-                               check_overlap=TRUE,breaks = niveles)
-  
   pp <- pp + geom_polygon( data=shore,aes(x=long,y=lat,group=group),color = 'black', fill = 'grey80',inherit.aes=FALSE  )
   # pp <- pp + geom_dl(data=mapa,aes(x=lon,y=lat,z=z,label=..level..),col='black',
   #                    method = list('bottom.pieces', cex=2.0), stat="contour",
   #                    breaks = niveles)
   # 
+  
+  
+  pp <- pp + geom_text_contour(data=mapa, aes(x=lon,y=lat,z=z),
+                               stroke = 0.15,skip=0,min.size =npts,size=tamanio,rotate = FALSE,
+                               check_overlap=TRUE,breaks = niveles)
+  
   for (kk in 1:length(fronteras)){
     f <- as.data.frame(fronteras[[kk]])
     pp <- pp + geom_point(data=f,aes( x=X1,y=X2 ),col='grey30',size=0.05,inherit.aes=FALSE)
   }
   
-  if (rango.lon<=20){
+  
+  
+  if (rango.lon<=20 & poner_boyas){
     pp <- pp + geom_point(data=boyas,aes(x=x,y=y),color='black',size=5,inherit.aes=FALSE)  
     pp <- pp + geom_text(data=boyas,aes(x=x,y=y-0.4,label=c('B1','B2')),
                        color='black',size=12,inherit.aes=FALSE)

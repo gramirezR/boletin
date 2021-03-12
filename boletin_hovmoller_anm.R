@@ -53,17 +53,17 @@ require('metR')
     
     lista <- lista[-seq(1:cortar.lista)]}
   
-  indc <- which(point.in.polygon( malla$lon,malla$lat,
+    indc <- which(point.in.polygon( malla$lon,malla$lat,
                                   poligono$lon,poligono$lat )==1)
   
-  X <- malla$lon[indc]
-  Y <- malla$lat[indc]
+    X <- malla$lon[indc]
+    Y <- malla$lat[indc]
   
-  latitudes <- unique(malla$lat[indc])
+    latitudes <- unique(malla$lat[indc])
   
-  datos <- matrix( nrow =  length(latitudes),
+    datos <- matrix( nrow =  length(latitudes),
                    ncol = (length(lista)-4) ) 
-  tiempo <- array(  dim = (length(lista)-4) )
+    tiempo <- array(  dim = (length(lista)-4) )
   
   for ( ii in 3:(length( lista)-2) ) {
     Sla <- 0*Sla

@@ -122,7 +122,7 @@ etiquetas_x <- unlist(lapply( as.vector(marcas_x),
 
 contornos <- seq(from=0,to=30,by=1)
 png(width=1200,height=850,
-    filename =paste0('C:/Users/gramirez/ANM/boletin/temp/2019/figuras/perfil_',
+    filename =paste0('E:/boletin/temp/2019/figuras/perfil_',
                      arch.sin.grb,'.png'))
 
 pp <- ggplot(data=mapa.nuevo,aes(x=lat,y=prof,fill=pot))
@@ -166,7 +166,7 @@ dev.off()
 
 temp.GODAS <- mapa.nuevo
 
-load('D:/GODAS_1989-2009/climatologia_GODAS_1989-2009.RDat')
+load('E:/GODAS_1989-2009/climatologia_GODAS_1989-2009.RDat')
 
 anomalia.Temp <- data.frame( lat = mapa.nuevo$lat,prof = mapa.nuevo$prof, 
                              pot = mapa.nuevo$pot - temp.GODAS$pot)
@@ -176,7 +176,7 @@ anomalia.Temp <- data.frame( lat = mapa.nuevo$lat,prof = mapa.nuevo$prof,
 niveles <- seq(from=-10,to=10,by=1)
 ymax <- 150
 png(width=1200,height=850,
-    filename =paste0('C:/Users/gramirez/ANM/boletin/temp/2019/figuras/anomalia_temp_GODAS_',
+    filename =paste0('E:/boletin/temp/2019/figuras/anomalia_temp_GODAS_',
                      arch.sin.grb,'.png'))
 
 pp <- ggplot(data=anomalia.Temp,aes(x=lat,y=prof,fill=pot))

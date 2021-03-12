@@ -16,9 +16,63 @@ ruta.archivos <- function(inicio,final,ruta){
   })
   unlist(lista)
 }
+############################################################
+ruta_ftp_diario <- 'ftp://gramirez2:$boletinDHN2018@my.cmems-du.eu/Core/GLOBAL_REANALYSIS_PHY_001_031/global-reanalysis-phy-001-031-grepv2-daily'
+ruta.archivos_diario <- function(inicio,final,ruta){
+  lista.carpetas.ftp <- lapply(seq(from=inicio,to=final,by='month'),
+                               function(x){
+                                 ss <- str_replace_all(string = str_sub(string = x,start = 1,7),pattern = '-',replacement = '/')
+                                 paste0(ruta_ftp_diario,'/',ss,'/')                   
+                               })
+  lista <-  lapply(lista.carpetas.ftp, FUN=function(x){ 
+      y  <-  getURL(x,dirlistonly = TRUE,verbose=TRUE)
+      y <- strsplit(y,'\r\n')
+       y <- lapply( y, FUN=function(z){
+         paste0( x,z )
+       }  )
+      })
+  lista <- unlist(strsplit(unlist(lista),'\r\n'))
 
+}
+############################################################
+ruta_ftp_mensual <- 'ftp://gramirez2:$boletinDHN2018@nrt.cmems-du.eu/Core/GLOBAL_ANALYSIS_FORECAST_PHY_001_024/global-analysis-forecast-phy-001-024-monthly'
+ruta.archivos_mensual<- function(inicio,final,ruta){
+  lista.carpetas.ftp <- lapply(seq(from=inicio,to=final,by='month'),
+                               function(x){
+                                 ss <- str_sub(string = x,start = 1,4)
+                                 paste0(ruta_ftp_mensual,'/',ss,'/')                   
+                               })
+  lista <-  lapply(lista.carpetas.ftp, FUN=function(x){ 
+    y  <-  getURL(x,dirlistonly = TRUE,verbose=TRUE)
+    y <- strsplit(y,'\r\n')
+    y <- lapply( y, FUN=function(z){
+      paste0( x,z )
+    }  )
+  })
+  lista <- unlist(strsplit(unlist(lista),'\r\n'))
+  
+}
+
+
+
+# ftp://my.cmems-du.eu/Core/GLOBAL_REANALYSIS_PHY_001_030/global-reanalysis-phy-001-030-daily/2018/12/mercatorglorys12v1_gl12_mean_20181201_R20181205.nc
 ###########################################################
 
+bajar.archivos.Mercator <- function(lista,guardar.en.carpeta){
+  lapply(lista, function(x){
+    nombre.archivo <- substring(x,first = 126,last = 163)
+    ruta.local <- paste0(guardar.en.carpeta,nombre.archivo)
+    directorio <- paste0(guardar.en.carpeta,substring(x,first = 126,last = 146))
+    if(!dir.exists(directorio)){
+      dir.create(directorio,recursive = TRUE)
+    }
+    if (!file.exists(ruta.local)){
+      download.file( x, ruta.local,method = "auto",quiet = FALSE, mode="wb", cacheOK = TRUE  )}
+  })
+}
+
+
+########################################################
 bajar.archivos <- function(lista,guardar.en.carpeta){
   lapply(lista, function(x){
     nombre.archivo <- substring(x,first = 125,last = 163)
@@ -29,12 +83,13 @@ bajar.archivos <- function(lista,guardar.en.carpeta){
 }
 
 ###########################################################
-promedio <- function(archivo,variable,inicio,cuantos,factor.var){
+promedio <- function(archivo,variable,inicio,cuantos){
   
   variable <- var.get.nc(archivo,variable,
                          start = inicio,
-                         count = cuantos)
-  return(apply(X = variable,MARGIN = c(1,2),FUN = mean,na.rm=TRUE)*factor.var)
+                         count = cuantos,
+                         unpack=TRUE)
+  return(apply(X = variable,MARGIN = c(1,2),FUN = mean,na.rm=TRUE))
 }
 
 #########################################################

@@ -1,23 +1,27 @@
 cat('\014')
 rm(list=ls())
 library('ggplot2')
+# library('rgeos')
 library('maptools')
 library('reshape2')
-
-setwd('D:/programasR/')
-  gshhs.dir <- 'D:/programasR/gshhs/'
-salida.arch <- 'D:/marcoMerma/costa_Callao_full.RData'
+graphics.off()
+setwd('E:/programasR/')
+gshhs.dir <- 'E:/programasR/gshhg-bin-2.3.7/'
+salida.arch <- 'E:/medina/costa_talara_full.RData'
 
 ##########
 
-limites.lon <- c(-90, -75)+360
-limites.lat <- c(-12.5, -11.5)
+limites.lon <- c(-81.4, -81.2)+360
+limites.lat <- c(-4.6, -4.5)
 
 gpclibPermit()
 
+# rgeosStatus()
+
 shore <- getRgshhsMap( paste0(gshhs.dir,'gshhs_f.b') ,
-                        xlim = limites.lon-360,
-                        ylim = limites.lat,avoidGEOS=TRUE,shift=TRUE)
+                         xlim = limites.lon-360,
+                         ylim = limites.lat,
+                    avoidGEOS = TRUE,shift=TRUE)
 
 plot(shore)
 

@@ -19,16 +19,18 @@ setwd('E:/programasR/boletin/')
 #fecha.actual <- 
 
 #hoy <- lubridate::today() 
+fecha.inicial <- as.Date('2021-03-01')
+fecha.final <- lubridate::today() - 1
 
-fecha.inicial <-  lubridate::today() - 1  
-dia <- lubridate::day(fecha.inicial) 
-dias.atras <- as.numeric(fecha.inicial - as.Date('2020-11-01'))
-
-fecha.anterior <- fecha.inicial - dias.atras# - dias.atras
+# fecha.final <- lubridate::today() - 1
+dia <- lubridate::day(fecha.final) 
+# dias.atras <- as.numeric(fecha.final - as.Date('2021-02-01'))
+# 
+# fecha.inicial <- fecha.final - dias.atras# - dias.atras
 
 periodo <- 'mensual'
-
-secuencia <- seq(from=fecha.anterior,to=fecha.inicial,by='21 days')
+intervalo <- paste(lubridate::day(fecha.final)-1,'days')
+secuencia <- seq(from=fecha.inicial, to=fecha.final,by=intervalo)
 
 carpeta <-lapply(unique(format(secuencia,format='%Y/%m')),
                  function(x) paste0('E:/boletin/viento/',lubridate::year(fecha.inicial),'/datos/') )
@@ -64,7 +66,7 @@ lapply(datos ,function(x){
 
 
 # ftp.dir <- paste0('ftp://gramirez2:$boletinDHN2018@nrt.cmems-du.eu/Core/WIND_GLO_WIND_L3_NRT_OBSERVATIONS_012_002/KNMI-GLO-WIND_L3-OBS_SCATSAT-1_OSCAT_50_DES_V2/',anio,'/',mes,'/')
-ftp.dir <- lapply(unique(format(secuencia,format='%Y/%m/')),
+ftp.dir <- lapply( unique(format(secuencia,format='%Y/%m/') ),
                   function(x)paste0('ftp://gramirez2:$boletinDHN2018@nrt.cmems-du.eu/Core/WIND_GLO_WIND_L4_NRT_OBSERVATIONS_012_004/CERSAT-GLO-BLENDED_WIND_L4-V6-OBS_FULL_TIME_SERIE/',x))
 escala <- c(.2,1.5,1.0,0.02)
 
@@ -73,6 +75,7 @@ escala <- c(.2,1.5,1.0,0.02)
 lista <- lapply(ftp.dir,function(x) {
     y <- getURL(x,dirlistonly = TRUE,verbose=TRUE)
     strsplit(y,'\r\n')
+    
     } )
 
 lista <- lapply(X = lista,FUN=unlist)
@@ -108,7 +111,10 @@ destino <- mapply(FUN=function(x,y){
  
 if (length(destino>0)){
   mapply(FUN = function(a,b){
-    if(!file.exists(b)){
+    info <- url.exists(url, .header=TRUE)
+    tamanio <- as.numeric(info['Content-Length']) 
+    print(tamanio)
+    if(!file.exists(b) ){
     download.file( url= a, destfile= b,
                    method = "auto",quiet = FALSE, mode="wb", cacheOK = TRUE  )
     closeAllConnections()}
@@ -160,7 +166,7 @@ lista.ArchsAnalisis <- lapply(X=lista.fechas,FUN=function(x){
 
 for (ii in 1:length(lista.ArchsAnalisis) ) {
   narchs <- 0
-  falla <- 0
+  .GlobalEnv$falla <- 0
   u <- matrix(0.0,nrow=1440,ncol = 641)
   v <- u
   lista.dia <- lista.ArchsAnalisis[[ii]]
@@ -176,7 +182,7 @@ for (ii in 1:length(lista.ArchsAnalisis) ) {
       lat <- ncvar_get(ncId,'lat') 
       nc_close(ncId)},
       error=function(e) {e
-        falla <- falla+1 })
+        .GlobalEnv$falla <- .GlobalEnv$falla + 1 })
          kk <- kk + 1
        }else{
          break
@@ -184,7 +190,7 @@ for (ii in 1:length(lista.ArchsAnalisis) ) {
     }
   
 #####################################
-nbuenos <- narchs - falla
+nbuenos <- narchs - .GlobalEnv$falla
 
 u <- u/nbuenos
 v <- v/nbuenos
