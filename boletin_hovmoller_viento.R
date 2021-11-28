@@ -21,7 +21,7 @@ library('ggquiver')
 raiz <- 'E:/boletin/'
 setwd(raiz)
 gshhs.dir <- 'E:/programasR/gshhg-bin-2.3.7/'
-############### DEFINICIÓN DEL POLÍGONO #################
+############### DEFINICI?N DEL POL?GONO #################
 franja <- '50'
 if (is.na(as.numeric(franja))){
   load('E:/programasR/boletin/peru_poli_ENFEN.RData')
@@ -31,10 +31,10 @@ if (is.na(as.numeric(franja))){
 cualPoli <- costa@polygons[[1]]@Polygons[[1]]@coords
 #############DEFINICION DE FECHAS##################
 
-dias.atras <- 180
+dias.atras <- 30*6
 fecha.actual <- lubridate::today() - 2
 
-fecha.anterior <- fecha.actual - dias.atras # en días
+fecha.anterior <- fecha.actual - dias.atras # en d?as
 #fecha.anterior <- as.Date('2019/10/01')
 prueba <- FALSE
 
@@ -90,7 +90,7 @@ lista.archs <- lista.archs[-(1:diasInd)]
 
 ##############################################
 # lista.archs <- list.files(path=datos.dir,full.names = TRUE)
-####### POLÍGONOS PARA HOVMOLLER ###############
+####### POL?GONOS PARA HOVMOLLER ###############
 # load('D:/programasR/boletin/peru_poli_ENFEN.RData')# variable costa
 # poli50_200 <- costa@polygons[[1]]@Polygons[[1]]@coords
 #load('C:/Users/gramirez/programasR/boletin/peru_poli_viento.RData')
@@ -218,12 +218,12 @@ interpolar<- data.frame( tiempo = malla2$tiempo,
 
 nSerie <- length(malla$tiempo)
 
-suave <- gam(mag ~ te(tiempo,lat,k=c(50,20)),data = interpolar)
- pred <- predict(suave,newdata = as.data.frame(malla))
-    Z <- stack( pred )$values
-    indc <- which(Z<0)
-    Z[indc] <- 0
-    
+# suave <- gam(mag ~ te(tiempo,lat,k=c(50,20)),data = interpolar)
+#  pred <- predict(suave,newdata = as.data.frame(malla))
+#     Z <- stack( pred )$values
+#     indc <- which(Z<0)
+#     Z[indc] <- 0
+#     
     
     suave <- gam(u ~ te(tiempo,lat,k=c(50,20)),data = interpolar)
     pred <- predict(suave,newdata = as.data.frame(malla))
@@ -233,6 +233,7 @@ suave <- gam(mag ~ te(tiempo,lat,k=c(50,20)),data = interpolar)
     pred <- predict(suave,newdata = as.data.frame(malla))
     V <- stack( pred )$values
     
+    Z <- sqrt(U^2 + V^2)
     
     
 hovmoller <- data.frame(   tiempo = as.Date(malla$tiempo,origin='1970-01-01'),
@@ -246,7 +247,7 @@ hovmoller$v <- hovmoller$v/hovmoller$mag
 rm(list=c('Z','U','V'))
 
 ######### DIAGRAMA DE HOVMOLLER ################
-poner <- seq(from=1,to=nSerie,length.out = 5500  )
+poner <- seq(from=1,to=nSerie,length.out = 7600  )
 if (exists('pp')){
   rm(pp)
 }
@@ -264,7 +265,7 @@ paleta_color <- c('#f0f0f0','#b4b4b4','#7878f7','#3c3cfb','#6000ff','#0040ff',
                   '#aaff55','#d4ff2b','#ffff00','#ffd400','#ffaa00','#ff8000',
                   '#ff5500','#ff2b00','#ff0000','#d40000','#aa0000','#800000')
 
-niveles <- seq(from=0,to=14,by=3)
+niveles <- seq(from=0,to=14,by=2)
 if (is.na(as.numeric(franja))){
   franja <- str_replace_all('50 a 200',pattern = ' ',replacement = '_')}
 png(filename = paste0(figuras,'Hovmoller_viento_',fecha.actual,'_',franja,'millas.png'),width=2400,height=1000)
@@ -280,13 +281,13 @@ pp <- pp + geom_text_contour(data=hovmoller,aes(x=tiempo,y=lat,z=mag,label=..lev
 pp <- pp + geom_quiver(data = hovmoller[poner,],
                        aes(   x = tiempo[poner],y = lat[poner],
                               u = u[poner],v = v[poner]),
-                       vecsize = 10,
+                       vecsize = 3,
                        size = 1,
                        inherit.aes = FALSE)
 pp <- pp + labs(x = 'Fecha',y = 'Latitud',
-                title = paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                               'Dpto. de Oceanografía - Div. Oceanografía'),
-                subtitle = paste0('Magnitud y dirección del viento: ',
+                title = paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                               'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
+                subtitle = paste0('Magnitud y direcciÃ³n del viento: ',
                                   format(fecha.anterior,'%B-%d'),' a ',
                                   format(fecha.actual,'%B-%d'),'\nFranja de ',franja,' millas'),
                 caption = 'Fuente: IFREMER CERSAT Global Blended Mean Wind Fields on 25km X 25km grid')
@@ -295,7 +296,8 @@ pp <-  pp +theme( axis.text.x = element_text( size=28, angle = 90 ),
                   axis.text.y = element_text( size=28 ),
                   axis.title.x = element_text( size=28 ),
                   axis.title.y = element_text( size=28 ),
-                  title = element_text(size=36),
+                  plot.title = element_text(size=36),
+                  plot.subtitle = element_text(size=42),
                   plot.caption = element_text(size = 30,hjust = 0))
 
 pp <- pp + guides( fill = guide_colorbar(barheight = unit(20, "cm"),

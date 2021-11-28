@@ -16,7 +16,7 @@ boletin_hovmoller_ecuatorial_anm <- function(lista ,
   require('metR')
   
   
-  ###### DEFINICIÓN DE LA REGIÓN
+  ###### DEFINICI?N DE LA REGI?N
   
   
   region.lat <- limite.lat
@@ -108,13 +108,13 @@ boletin_hovmoller_ecuatorial_anm <- function(lista ,
     y <- lon
   }
   
-  tiempo <- seq( from=min(x),to=max(x),length.out = length(tie)  )
+  tiempo <- seq( from=min(x),to=max(x)+8,length.out = length(tie)  )
   longitud <- seq( from=min(y),to=max(y),length.out = length(lon)  )
   
   
   modelo.gam <-  TRUE
   if (modelo.gam){
-    malla <- expand.grid(lon=y,T=x)
+    malla <- expand.grid(lon=y,T=x+8)
     
     malla_interpolacion <- expand.grid(lon=longitud,T=tiempo)
     
@@ -156,7 +156,13 @@ boletin_hovmoller_ecuatorial_anm <- function(lista ,
   }
   
   
-  paleta_color <- cptcity::cpt('ncl_amwg_blueyellowred')
+  # paleta_color <- cptcity::cpt('ncl_amwg_blueyellowred')
+  paleta_color <- cptcity::cpt('ncl_BlueWhiteOrangeRed', n=19)
+  
+  paleta_color <- c(paleta_color[1:9],
+                    paleta_color[10],paleta_color[10],
+                    paleta_color[10],paleta_color[10],
+                    paleta_color[11:19])
   if (exists('pp')){
     rm(pp)
   }
@@ -186,7 +192,9 @@ boletin_hovmoller_ecuatorial_anm <- function(lista ,
   ######
   pp <- ggplot(data=hovmoller,aes(y=lon,x=T,fill=anm)) 
   pp <- pp + geom_raster(aes(fill = anm),interpolate=FALSE,show.legend = TRUE  )
-  pp <- pp + scale_fill_gradientn(colours = paleta_color,breaks = niveles,limits =range(niveles))
+  pp <- pp + scale_fill_gradientn(colours = paleta_color,
+                                  breaks = niveles,
+                                  limits =range(niveles))
   
   pp <- pp + stat_contour(  data = hovmoller, aes(y=lon,x=T,z=anm),
                             breaks = contornos,
@@ -198,10 +206,10 @@ boletin_hovmoller_ecuatorial_anm <- function(lista ,
   
   pp <- pp + labs(       y = 'Longitud',
                          x = 'Fecha 2018-2019',
-                         title = paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                                        'Dpto. de Oceanografía - Div. Oceanografía'),
+                         title = paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                                        'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
                          subtitle = expression( Zona~Ecuatorial~2*degree~N~a~2*degree~S),
-                         caption = 'Fuente: COPERNICUS MARINE\n             ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatología: 1981-2009')
+                         caption = 'Fuente: COPERNICUS MARINE\n             ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatologÃ­a: 1981-2009')
   pp <- pp + theme_bw()
   
   # pp <- pp + scale_x_continuous(expand = c(0.02,0.02),

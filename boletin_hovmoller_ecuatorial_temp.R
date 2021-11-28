@@ -1,4 +1,4 @@
-hovmoller_ecuatorial_temp <- function(lista.archivos,variable,region.lon,region.lat){
+hovmoller_ecuatorial_temp <- function(lista.archivos,variable,region.lon,region.lat, suavizar){
   narchs <- length(lista.archivos)
   require('metR')
   #### DELIMITAR LA ZONA
@@ -16,25 +16,38 @@ hovmoller_ecuatorial_temp <- function(lista.archivos,variable,region.lon,region.
   #######
   
   lon <- lon[indc.lon]
+  
   n.lon <- diff( range(indc.lon)  ) + 1
+  
   n.lat <- diff( range(indc.lat)  ) + 1
-  n.tie <- narchs
+  
+  #ind_tie <- seq(from=1, to=narchs, by=7)
+  
+  n.tie <- length(lista.archivos)
+  
   temp <- array( dim=c(n.tie,length(lon)) )
+  
   tie <- array( dim=n.tie )
-  for (ii in 1:narchs){
+  
+  for (ii in 1:n.tie){
     ncin <- open.nc(lista.archivos[ii])
+    
     tie[ii] <- var.get.nc(ncin,'time')/86400
+    
     M <- var.get.nc(ncin,variable)
+    
     close.nc(ncin) 
+    
     ys <- rowMeans(M[indc.lon,indc.lat],na.rm=TRUE)
+    
     inds <- !is.na(ys)
+    
     temp[ii,]  <- (0.01*ys)
+    
     rm('ys')
   }
   
-  
   ###### ARMADO DEL DATA.FRAME PARA GGPLOT#####
-  
   
   malla <- expand.grid(T=tie,lon=lon)
   
@@ -46,6 +59,7 @@ hovmoller_ecuatorial_temp <- function(lista.archivos,variable,region.lon,region.
                              anm = Z$values)
   
   # suave <- loess(anm~lon+T,data=hovmoller,span=0.018)
+  
   suave <- mgcv::gam(anm~ te(T,lon,k=c(20,20)),data = hovmoller)
   pred <- predict(suave,newdata = as.data.frame(malla))
   
@@ -59,15 +73,17 @@ hovmoller_ecuatorial_temp <- function(lista.archivos,variable,region.lon,region.
   
   paleta_color <- cptcity::cpt('ncl_amwg_blueyellowred')
   
-  niveles <- niveles <- seq(-6,6,by=0.5)
+  niveles <- niveles <- seq(-6, 6, by=0.5)
   
-  indcT <- grep( '[0-9]*-[0-9]*-01',as.Date(tie,origin='1981-01-01')  )
+  indcT <- grep( '[0-9]*-[0-9]*-01', as.Date(tie,origin='1981-01-01')  )
   
-  marcas_y <- tie[indcT]
+  marcas_y <- tie[indcT]  
   
-  etiquetas_y <- months(as.Date(marcas_y,origin='1981-01-01'),abbreviate =TRUE)
+  #tie[indcT
   
-  etiquetas <- seq(from=region.lon[1],to=region.lon[2],by=20)
+  etiquetas_y <- months(as.Date(marcas_y, origin='1981-01-01'), abbreviate =TRUE)
+  
+  etiquetas <- seq(from=region.lon[1], to=region.lon[2], by=20)
   
   etktas <- unlist(lapply( -(etiquetas - 360) ,
                            function(x){ 
@@ -98,11 +114,11 @@ hovmoller_ecuatorial_temp <- function(lista.archivos,variable,region.lon,region.
    # 
   pp <- pp + labs(       y = 'Longitud',
                          x = 'Fecha 2019-2020',
-                         title = 'DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \nDpto. de Oceanografía - Div. Oceanografía',
-                         subtitle = expression(paste( 'Anomalía de la Temperatura Superficial del Mar ',
+                         title = 'DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \nDpto. de OceanografÃ­a - Div. OceanografÃ­a',
+                         subtitle = expression(paste( 'AnomalÃ­a de la Temperatura Superficial del Mar ',
                                                       2*degree~N~a~2*degree~S)) ,
                          caption = paste0('Fuente: COPERNICUS MARINE ENVIRONMENT\n             MONITORING SERVICE (CMEMSv3.0)',
-                                          '\nClimatología: 1993-2012'))
+                                          '\nClimatologÃ­a: 1993-2012'))
   pp <- pp + theme_bw()
   pp <- pp + scale_x_continuous( breaks = marcas_y, 
                                   label = etiquetas_y,
@@ -117,12 +133,12 @@ hovmoller_ecuatorial_temp <- function(lista.archivos,variable,region.lon,region.
                     axis.text.x = element_text( size = 34,color='black',angle=90 ),
                     axis.title.y = element_text( size = 40 ),
                     axis.title.x = element_text( size = 40 ),
-                    title = element_text( size = 26 ),
+                    title = element_text( size = 32 ),
                     plot.caption = element_text( size = 28,hjust = 0))
   
   pp <- pp + guides( fill = guide_colorbar(  barheight = unit(25, "cm"),barwidth = unit(1.5,'cm'),
                                              label.theme = element_text(size=30),
-                                             title = 'ATSM\n°C',
+                                             title = 'ATSM\n?C',
                                              title.theme = element_text(size=28)))
   
   return(pp)

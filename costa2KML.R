@@ -7,8 +7,8 @@ library(rgdal)
 library('splines')
 library('ggplot2')
 graphics.off()
-setwd("D:/programasR/")
-load('costa_viento.RDat')
+setwd("E:/programasR/")
+load('E:/programasR/boletin/costa_5N_35S.RData')
 
 #################
 
@@ -18,11 +18,11 @@ load('costa_viento.RDat')
 # plot(pp)
 # 
 #################
-  kml.arch <- "peru_poli_ENFEN.kml"
-rdata.arch <- "peru_poli_ENFEN.RData"
+  kml.arch <- "peru_poli__5N_35S.kml"
+rdata.arch <- "peru_poli__5N_35S.RData"
 
- ancho.ini <- 0/60 # EN GRADOS: 1 MINUTO = 1 MiNautica
- ancho.fin <- 0/60
+ ancho.ini <- 90/60 # EN GRADOS: 1 MINUTO = 1 MiNautica
+ ancho.fin <- 20/60
  
  dlat <- diff(range(shore$lat))
  
@@ -32,29 +32,33 @@ if (exists('costa'))rm(costa)
 ########### 
 graphics.off()
 costa.tmp1 <- shore[shore$group==2.1,]
-costa.tmp2 <- shore[shore$group==3.1,]
+
 
 # windows()
 # pp <- ggplot(data=costa.tmp1,aes(x=long,y=lat))
 # pp <- pp + geom_point()
 # plot(pp)
 
- costa.tmp1 <- costa.tmp1[1100:29870,]
- costa.tmp2 <- costa.tmp2[1:83000,]
+ # costa.tmp1 <- costa.tmp1[1100:29870,]
+ # costa.tmp2 <- costa.tmp2[1:83000,]
+#######
+costa.tmp2 <- shore[shore$group==3.1,]
+npts <- length(costa.tmp2[,1])
+costa.tmp2 <- costa.tmp2[-c(npts-2,npts-3),]
 windows()
-pp <- ggplot(data=costa.tmp1,aes(x=long,y=lat))
+pp <- ggplot(data=costa.tmp2,aes(x=long,y=lat))
 pp <- pp + geom_point()
 plot(pp)
 ##############
- costa.tmp1 <- costa.tmp1[,c(1,2)]
- costa.tmp1$long <- rev(costa.tmp1$long)
- costa.tmp1$lat <- rev(costa.tmp1$lat)
- 
+ # costa.tmp1 <- costa.tmp1[,c(1,2)]
+ # costa.tmp1$long <- rev(costa.tmp1$long)
+ # costa.tmp1$lat <- rev(costa.tmp1$lat)
+ # 
  costa.tmp2 <- costa.tmp2[,c(1,2)]
  costa.tmp2$long <- rev(costa.tmp2$long)
  costa.tmp2$lat <- rev(costa.tmp2$lat)
  
-costa.tmp <- rbind(costa.tmp1,costa.tmp2)
+costa.tmp <- costa.tmp2
 
 # windows()
 # pp <- ggplot(data=costa.tmp,aes(x=long,y=lat))
@@ -86,12 +90,14 @@ Pol2$lon <- df.2$lon - rev(ancho.pol)
 
  #indc <- 250:550
  #Pol2 <- Pol2[-indc,]
-windows()
-plot(Pol1$lon,Pol1$lat)
-lines(Pol2$lon,Pol2$lat)
+  windows()
+  plot(Pol1$lon,Pol1$lat)
+  lines(Pol2$lon,Pol2$lat)
 ####### UNION DE LOS POLIGONOS #############
-
-costa.df <- rbind(Pol1,Pol2)
+Pol2$lat <- Pol2$lat
+  Pol2$lon <-Pol2$lon
+Pol1 <- Pol1[-1,]
+costa.df <- rbind(Pol1,Pol2,Pol1[1,])
 
 #####################
 # costa.df <- as.data.frame(Pol2)

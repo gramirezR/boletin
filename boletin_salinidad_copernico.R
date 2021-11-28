@@ -1,3 +1,4 @@
+#####
 cat('\014')
 rm(list=ls())
 graphics.off()
@@ -12,36 +13,39 @@ library('directlabels')
 library('maptools')
 library('reshape2')
 library('metR')
+
+
 # source('bajarCopernico.R')
-source('boletin_lista_salinidad.R')
-source('boletin_mapa_costero_salinidad.R')
+source('boletin_lista_salinidad.R',encoding = 'UTF-8')
+source('boletin_mapa_costero_salinidad.R',encoding = 'UTF-8')
 raiz <- 'E:/boletin/salinidad/'
 gshhs.dir <- 'E:/programasR/gshhg-bin-2.3.7/'
 #############DEFINICION DE FECHAS##################
 
 t0.copernico <- as.Date('1981-01-01') # segundos desde esta fecha
-fecha.inicial <- as.Date('2021-03-01')
+fecha.inicial <- as.Date('2021-11-01')
 fecha.final <- lubridate::today() - 2
 
-dias.atras.hov <- 30*6 + 1
-periodo = 'mensual'
-if (periodo=='mensual'){
-  intervalo <- paste(lubridate::day(fecha.final)-1,'days')
+dias.atras.hov <- 30*13 + 1
+periodo <- 'semanal'
+
+if (periodo=='semanal'){
+  intervalo <- paste( as.numeric(fecha.final-fecha.inicial)-1,'days' )
   dias <- seq(from=fecha.inicial, to=fecha.final,by=intervalo)  
 }else{
   dias <- seq(from=fecha.inicial, to=fecha.final,by='7 days')
-  if ((lubridate::day(fecha.final)-lubridate::day(fecha.inicial))%%7>0){
+  if (as.numeric(fecha.final-fecha.inicial)%%7>0){
     dias <- c(dias, fecha.final)
   }
 }
  
 
-for (ii in 1: (length(dias)-1)){
-  lista_archivos <- boletin_lista_salinidad(dias[ii:(ii+1)],raiz)
+for (ii in 1:(length(dias)-1)){
+  lista_archivos <- boletin_lista_salinidad(seq(dias[ii],dias[ii+1], by='day'),raiz)
   row.names(lista_archivos) <- NULL 
   boletin_mapa_costero_salinidad(lista_archivos,dias[ii],dias[ii+1]) 
 }
-############ POLÍGONO PARA HOVMOLLER COSTEROS ###############
+############ POLÃGONO PARA HOVMOLLER COSTEROS ###############
 
 poli50 <- matrix(c(-78.58496522661444,1.021363921916344,
                    -78.50821467634449,1.995645822855158,
@@ -70,12 +74,13 @@ poli50 <- matrix(c(-78.58496522661444,1.021363921916344,
                    -78.58496522661444,1.021363921916344),nrow=25,ncol=2,byrow=TRUE) 
 
 #############################################################
-source('boletin_hovmoller_costero_salinidad.R')
+
 lim.lat <- c(-20, 2)
 
-dias <- seq(from=fecha.inicial - dias.atras.hov, to=fecha.final,by='day')
+dias <- seq(from=lubridate::today() - dias.atras.hov, to=fecha.final,by='day')
 
 lista_archivos <- boletin_lista_salinidad(dias,raiz)
-
+##################################
+source('boletin_hovmoller_costero_salinidad.R',encoding = 'UTF-8')
 hovmoller_costero_salinidad(lista_archivos, poli50,lim.lat,50)
 

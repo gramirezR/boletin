@@ -94,20 +94,20 @@ mapa_costero_temp <- function(lista,variable,
   if (pracma::strcmp(variable,'analysed_sst' )){
     niveles <- seq(14,30,by=1)
     subtitulo.graf <- 'Temperatura Superficial del Mar'
-    titulo.barra <- 'TSM\n(?C)'
+    titulo.barra <- 'TSM\n(Â°C)'
   }else if( pracma::strcmp(variable,'sst_anomaly')){
     if (rango.lon>20){
       niveles <- seq(-6,6,by=1)
     }else {
       niveles <- seq(-6,6,by=0.5)
     }
-    subtitulo.graf <- 'Anomal?a de la Temperatura Superficial del Mar'
-    titulo.barra <- 'ATSM\n(?C)'
+    subtitulo.graf <- 'AnomalÃ­a de la Temperatura Superficial del Mar\n'
+    titulo.barra <- 'ATSM\n(Â°C)'
   }
   else{
     niveles <-seq(10,30,by=1)
     subtitulo.graf <-'Temperatura Superficial del Mar'
-    titulo.barra <- 'TSM\n(?C)'
+    titulo.barra <- 'TSM\n(Â°C)'
   }
   
   
@@ -162,8 +162,13 @@ mapa_costero_temp <- function(lista,variable,
   
   
   pp <- pp + geom_text_contour(data=mapa, aes(x=lon,y=lat,z=z),
-                               stroke = 0.15,skip=0,min.size =npts,size=tamanio,rotate = FALSE,
-                               check_overlap=TRUE,breaks = niveles)
+                               stroke = 0.15,
+                               skip=0,
+                               min.size =npts,
+                               size=tamanio,
+                               rotate = FALSE,
+                               check_overlap=TRUE,
+                               breaks = niveles)
   
   for (kk in 1:length(fronteras)){
     f <- as.data.frame(fronteras[[kk]])
@@ -187,10 +192,10 @@ mapa_costero_temp <- function(lista,variable,
                                 breaks = marcas_y,
                                 labels = etiquetas_y)
   pp <- pp + labs(x='Longitud',y='Latitud',
-                  title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                               'Dpto. de Oceanografía - Div. Oceanografía'),
+                  title=paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                               'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
                   subtitle = subtitulo.grafico,
-                  caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatología: 1981-2009')
+                  caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatologÃ­a: 1981-2009')
   #pp <- pp + coord_cartesian(xlim=c(282,283),ylim=c(-13,-10))
   pp <- pp + theme_bw(   )
   if (rango.lon>20){
@@ -199,14 +204,14 @@ mapa_costero_temp <- function(lista,variable,
                     axis.text.x = element_text(size=24,colour = 'black'),
                     axis.text.y = element_text(size=24,colour = 'black'),
                     title=element_text(size=28),
-                    plot.subtitle=element_text(size=24),
+                    plot.subtitle=element_text(size=38),
                     plot.caption = element_text(size = 22,hjust = 0))
   }else{
     pp <- pp + theme( axis.title.x = element_text( size=28,hjust=0.5  ),
                       axis.title.y = element_text( size=28,hjust=0.5  ),
                       axis.text = element_text(size=28,colour = 'black'),
                       title=element_text(size=28),
-                      plot.subtitle=element_text(size=24),
+                      plot.subtitle=element_text(size=32),
                       plot.caption = element_text(size = 22,hjust = 0))
   }
   

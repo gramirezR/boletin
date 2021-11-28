@@ -158,14 +158,14 @@ boletin_mapa_costero_anm_raster <- function(lista = archivos,
   pp <- pp + labs(x='Longitud',y='Latitud',
                   title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
                                'Dpto. de Oceanografía - Div. Oceanografía'),
-                  subtitle=paste0('Anomalia del nivel del Mar: ',etqt.fecha),
+                  subtitle=paste0('Anomalía del nivel del Mar:\n',etqt.fecha),
                   caption=paste0('Fuente: COPERNICUS MARINE\n             ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatología: 1981-2009'))
   pp <- pp + theme_bw(   )
   pp <- pp + theme( axis.title.x = element_text( size=28,hjust=0.5  ),
                     axis.title.y = element_text( size=28,hjust=0.5  ),
                     axis.text = element_text(size=28,colour = 'black'),
                     title=element_text(size=28),
-                    plot.subtitle=element_text(size=24),
+                    plot.subtitle=element_text(size=38),
                     plot.caption = element_text(size = 22,hjust = 0))
   pp <- pp + guides( fill = guide_colorbar(  barheight = unit(22, "cm"),
                                              barwidth = unit(1.5,'cm'),

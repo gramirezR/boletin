@@ -2,7 +2,8 @@ boletin_hovmoller_ecuatorial_anm_raster <- function(lista ,
                                         limite.lon,
                                         limite.lat,
                                         fecha.anterior,
-                                        fecha.actual){
+                                        fecha.actual,
+                                        filtro){
   
   require('RNetCDF')
   require('tidyverse')
@@ -14,11 +15,13 @@ boletin_hovmoller_ecuatorial_anm_raster <- function(lista ,
   require('scales')
   require('mgcv')
   require('metR')
-  library('raster')
+  require('WaveletComp')  
+  # require('tswge')
+  require('raster')
   source('herramientas.R')
   
   
-  ###### DEFINICIÓN DE LA REGIÓN
+  ###### DEFINICI?N DE LA REGI?N
   
   #extract(velocidad,costa)
   
@@ -48,12 +51,15 @@ boletin_hovmoller_ecuatorial_anm_raster <- function(lista ,
   anm <- vector(mode='list',length=narchs)
   tie <- array(dim=narchs)
   for (ii in 1:narchs){
-    tryCatch({ncConn <- open.nc(lista[ii])
+    tryCatch({
+             print(lista[ii])
+             ncConn <- open.nc(lista[ii])
              longitud <- var.get.nc(ncConn,variable='longitude')
              latitud <- var.get.nc(ncConn,variable='latitude')
              indc.lat <- which(  latitud>=limite.lat[1] &  latitud<=limite.lat[2])
-             datos <- var.get.nc(ncConn,'sla')*1.0e-2
+             datos <- var.get.nc(ncConn,'sla', unpack = TRUE)
              tie[ii] <- 24*3600*var.get.nc(ncin,'time')
+             print(as.Date(tie[ii]/86400,origin='1950-01-01'))
              if (!any(longitud<0)) {
                cuales.puntos <- longitud>=limite.lon[1] & longitud<=limite.lon[2]
                indc.lon <- which( cuales.puntos)
@@ -78,7 +84,7 @@ boletin_hovmoller_ecuatorial_anm_raster <- function(lista ,
     }else{
       anm[[ii]] <- 0.5*( anm[[ii-1]] + raster::t(anm[[ii+1]]) )
       tie[ii] <- 0.5*(tie[ii-1]+tie[ii+1])
-      print(ii)
+     # print(ii)
     }
   }
 
@@ -123,24 +129,88 @@ boletin_hovmoller_ecuatorial_anm_raster <- function(lista ,
       malla1 <- malla
     }
     
+    
+    ############FILTRO PASA BANDA DE 10 A 120 DIAS##################
+    
+    Z <- matrix(Z, nrow = length(longitud[indc.lon]), byrow = FALSE)
+    
+    Z <- apply(Z, MARGIN = 1,
+                   FUN=function(x) {
+                     # N <- length(x)
+                     # y <- c(rev(x),x,rev(x))
+                     # 
+                     # rr <- butterworth.wge(x = y,
+                     #                       order = 4,
+                     #                       type = 'pass',
+                     #                       cutoff = c(1/120, 1/10),
+                     #                       plot=FALSE)
+                     # resultado <- rr$x.filt
+                     # resultado <- resultado[(N+1):(2*N)]
+                     y_wavelet <-   analyze.wavelet(my.data = data.frame(x=x),
+                                                    loess.span = 1,
+                                                    dt = 1, dj = 1/250,
+                                                    lowerPeriod = 10,
+                                                    upperPeriod = 120,
+                                                    make.pval = TRUE,
+                                                    n.sim=10,
+                                                    verbose = FALSE)
+                     
+                     y_rec <- reconstruct(y_wavelet, plot.waves = FALSE,
+                                          verbose = FALSE )               
+                     graphics.off()
+                     resultado <- y_rec$series$x.r                     
+                     return( resultado )
+                   }
+    )
+    
+    Z <- 100*stack(as.data.frame(t(Z)))$values
+    
+    niveles <- seq(-12,12,by=2)
+    niveles2 <- seq(-12,12,by=2)
+    
+    #####################
+    
     hovmoller <- data.frame(    T = malla1$T,
                               lon = malla1$lon,
                               anm = Z)
-    suave <- gam(anm ~ te(T,lon,k=c(15,10)),data = hovmoller)
-    pred <- predict(suave,newdata = as.data.frame(malla.inter))
-     Z <- as.matrix( pred )
-     hovmoller <- data.frame(     T = malla.inter$T,
-                                  lon = malla.inter$lon,
-                                  anm = Z)
+    
+    # suave <- gam(anm ~ te(T,lon,k=c(15,10)),data = hovmoller)
+    # pred <- predict(suave,newdata = as.data.frame(malla.inter))
+    # 
+     # Z <- as.matrix( pred )
+     # hovmoller <- data.frame(     T = malla.inter$T,
+     #                              lon = malla.inter$lon,
+     #                              anm = Z)
   ############################################# 
   
   
-  paleta_color <- cptcity::cpt('ncl_amwg_blueyellowred')
+    paleta_color <- cptcity::cpt('ncl_BlueWhiteOrangeRed', n=19)
+    
+    paleta_color <- c(paleta_color[1:9],
+                      paleta_color[10],paleta_color[10],
+                      paleta_color[10],paleta_color[10],
+                      paleta_color[11:19])
   if (exists('pp')){
     rm(pp)
   }
   
-  niveles <- seq( from=-40,to=40,by=5 )
+     # if (filtro){
+     #   promedios <- mean(hovmoller$anm, na.rm=TRUE)
+     #   desv_sd <- sd(hovmoller$anm, na.rm=TRUE)
+     #   hovmoller$anm <- (hovmoller$anm - promedios)/ desv_sd
+     #   niveles <- seq(-4,4,by=0.25)
+     #   niveles2 <- seq(-4,4,by=0.5)
+     #   arch_fin = '_filtro'
+     #   contornos <-  niveles
+     # }
+     # else{
+       # niveles <- seq(-10,10,by=5)
+       # niveles2 <- seq(-10,10,by=5)
+       arch_fin = ''
+       contornos <- seq( from=-12,to=12,by=4 )
+       # contornos <- contornos[-7]
+     # }
+
 
   indcT <- grep( '[0-9]*-[0-9]*-01',as.Date(tie/86400,origin='1950-01-01')  )
 
@@ -160,26 +230,30 @@ boletin_hovmoller_ecuatorial_anm_raster <- function(lista ,
                              }
                            }) )
   ######
-  contornos <- seq( from=-30,to=30,by=2 )
+
   ######
   pp <- ggplot(data=hovmoller,aes(y=lon,x=T,fill=anm)) 
   pp <- pp + geom_raster(aes(fill = anm),interpolate=TRUE,show.legend = TRUE  )
-  pp <- pp + scale_fill_gradientn(colours = paleta_color,breaks = niveles,limits =range(niveles))
+  pp <- pp + scale_fill_gradientn(colours = paleta_color,
+                                  breaks = niveles2,
+                                  limits =range(niveles2))
   
   pp <- pp + stat_contour(  data = hovmoller, aes(y=lon,x=T,z=anm),
                             breaks = contornos,
                             col ='black' ,
                             inherit.aes = FALSE )
   pp <- pp + geom_text_contour(data=hovmoller,aes(y=lon,x=T,z=anm),
-                               stroke = 0.15,
+                               stroke = 0.15, min.size = 35, 
                                size=18,rotate = FALSE,check_overlap = TRUE)
   
   pp <- pp + labs(       y = 'Longitud',
-                         x = 'Fecha 2020',
-                         title = paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                                        'Dpto. de Oceanografía - Div. Oceanografía'),
+                         x = paste0('Fecha ',
+                                    lubridate::year(fecha.anterior), '-',
+                                    lubridate::year(fecha.actual)),
+                         title = paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                                        'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
                          subtitle = expression( Zona~Ecuatorial~2*degree~N~a~2*degree~S),
-                         caption = 'Fuente: COPERNICUS MARINE\n             ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatología: 1981-2009')
+                         caption = 'Fuente: COPERNICUS MARINE\nENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatologÃ­a: 1981-2009')
   pp <- pp + theme_bw()
   
   # pp <- pp + scale_x_continuous(expand = c(0.02,0.02),
@@ -199,12 +273,12 @@ boletin_hovmoller_ecuatorial_anm_raster <- function(lista ,
                               breaks = etiquetas,
                               labels =  etktas)
   
-  pp <- pp + theme( axis.text.x = element_text( size = 34,color='black' ),
-                    axis.text.y = element_text( size = 34,color='black' ),
+  pp <- pp + theme( axis.text.x = element_text( size = 34, color='black' ),
+                    axis.text.y = element_text( size = 34, color='black', hjust = 0.5 ),
                     axis.title.x = element_text( size = 40 ),
                     axis.title.y = element_text( size = 40 ),
-                    title = element_text( size = 26 ),
-                    plot.caption = element_text( size = 28,hjust = 0))
+                    title = element_text( size = 38 ),
+                    plot.caption = element_text( size = 28, hjust = 0))
   
   pp <- pp + guides( fill = guide_colorbar(barheight = unit(25, "cm"),
                                            barwidth = unit(2,'cm'),

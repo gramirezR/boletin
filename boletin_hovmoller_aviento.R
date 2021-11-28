@@ -32,7 +32,7 @@ if (is.na(as.numeric(franja))){
 cualPoli <- costa@polygons[[1]]@Polygons[[1]]@coords
 #############DEFINICION DE FECHAS##################
 
-dias.atras <- 180
+dias.atras <- 30*13
 fecha.actual <- lubridate::today() - 2
 fecha.anterior <- fecha.actual - dias.atras# en d?as
 prueba <- FALSE
@@ -263,7 +263,7 @@ hovmoller$v <- hovmoller$v/mag
   rm(list=c('Z','U','V','interpolar'))
 
 ######### DIAGRAMA DE HOVMOLLER ################
- poner <- seq(from=1,to=nSerie,length.out = 6500  )
+ poner <- seq(from=1,to=nSerie,length.out = 7700  )
 if (exists('pp')){
   rm(pp)
 }
@@ -305,9 +305,9 @@ pp <- pp + geom_quiver(data=hovmoller[poner,],aes(x=tiempo[poner],y=lat[poner],
                           size = 1,
                    inherit.aes = FALSE)
 pp <- pp + labs(x = 'Fecha',y = 'Latitud',
-                title = paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                               'Dpto. de Oceanografía - Div. Oceanografía'),
-                subtitle = paste0('Anomalía del viento: ',
+                title = paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                               'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
+                subtitle = paste0('AnomalÃ­a del viento: ',
                                   format(fecha.anterior,'%B-%d'),' a ',
                                   format(fecha.actual,'%B-%d'),'\nFranja de ',franja,' millas'),
                 caption = 'Fuente: IFREMER CERSAT Global Blended Mean Wind Fields on 25km X 25km grid')
@@ -316,7 +316,8 @@ pp <-  pp +theme( axis.text.x = element_text( size=28, angle = 90 ),
                   axis.text.y = element_text( size=28 ),
                   axis.title.x = element_text( size=28 ),
                   axis.title.y = element_text( size=28 ),
-                  title = element_text(size=36),
+                  plot.title = element_text(size=36),
+                  plot.subtitle = element_text(size=42),
                   plot.caption = element_text(size = 30,hjust = 0))
 
 pp <- pp + guides( fill = guide_colorbar(barheight = unit(20, "cm"),

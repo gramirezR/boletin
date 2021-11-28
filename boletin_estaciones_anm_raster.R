@@ -1,7 +1,7 @@
 boletin_estaciones_anm_raster <- function(lista,puntos,fecha.anterior,fecha.actual){
 
   require('raster')
-  
+  require('tswge')
   narchs <- length(lista)
   
   
@@ -63,14 +63,38 @@ boletin_estaciones_anm_raster <- function(lista,puntos,fecha.anterior,fecha.actu
   # windows()
   # plot(x.raster)
   # 
-  
+orden <- 4  
 balta <-  raster::extract(x.raster,t(as.matrix(puntos$balta)),layer=1,nl=nlayers(x.raster))
+rr <- butterworth.wge(x = balta,
+                      order = orden,
+                      type = 'pass',
+                      cutoff = c(1/120, 1/10),
+                      plot=FALSE)
+balta <- rr$x.filt
 chimbote <-  raster::extract(x.raster,t(as.matrix(puntos$chimbote)),layer=1,nl=nlayers(x.raster),method='bilinear')
+rr <- butterworth.wge(x = chimbote,
+                      order = orden,
+                      type = 'pass',
+                      cutoff = c(1/120, 1/10),
+                      plot=FALSE)
+chimbote <- rr$x.filt
 talara <-  raster::extract(x.raster,t(as.matrix(puntos$talara)),layer=1,nl=nlayers(x.raster))
+rr <- butterworth.wge(x = talara,
+                      order = orden,
+                      type = 'pass',
+                      cutoff = c(1/120, 1/10),
+                      plot=FALSE)
+talara <- rr$x.filt
 mollendo <- raster::extract(x.raster,t(as.matrix(puntos$mollendo)),layer=1,nl=nlayers(x.raster))
+rr <- butterworth.wge(x = mollendo,
+                      order = orden,
+                      type = 'pass',
+                      cutoff = c(1/120, 1/10),
+                      plot=FALSE)
+mollendo <- rr$x.filt
 ###########################################################
   
-anm <- rbind( t(balta) , t(chimbote) , t(talara), t(mollendo)  )
+anm <- cbind( t(balta) , t(chimbote) , t(talara), t(mollendo)  )
 est <- t(cbind(t(rep('Galapagos',nlayers(x.raster))),
               t(rep('Chimbote',nlayers(x.raster))),
               t(rep('Talara',nlayers(x.raster))),
@@ -85,22 +109,22 @@ grafica <- data.frame(    T = as.POSIXct(tie,origin='1950-01-01'),
 
  pp <- ggplot(data=grafica,aes(x=T,y=anm,colour=EST))
  pp <- pp + geom_path(size=1.5)
- pp <- pp + scale_color_manual(name='ESTACIÓN',values=c('Galapagos'='red',
+ pp <- pp + scale_color_manual(name='ESTACIÃ“N',values=c('Galapagos'='red',
                                                         'Talara'='blue','Chimbote'='green',
                                                         'Mollendo'='cyan'))
  pp <- pp + theme_bw() + scale_x_datetime(date_breaks = 'month',labels = waiver())
- pp <- pp + labs(x= 'Fecha',y='Anomalía nivel del mar (cm)',
-                 title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                              'Dpto. de Oceanografía - Div. Oceanografía'),
+ pp <- pp + labs(x= 'Fecha',y='AnomalÃ­a nivel del mar (cm)',
+                 title=paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                              'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
                  subtitle=paste0('Nivel del mar'),
                  caption=paste0('Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)',
-                                ' Climatología: 1993-2012'))
- pp <- pp + theme( axis.title.x = element_text( size=24,hjust=0.5  ),
-                   axis.title.y = element_text( size=24,hjust=0.5  ),
-                   axis.text = element_text(size=20),
+                                ' ClimatologÃ­a: 1993-2012'))
+ pp <- pp + theme( axis.title.x = element_text( size=30,hjust=0.5  ),
+                   axis.title.y = element_text( size=30,hjust=0.5  ),
+                   axis.text = element_text(size=20, hjust = 0.5, vjust = 0.5),
                    axis.text.x = element_text(angle=90),
                    title=element_text(size=26),
-                   plot.subtitle=element_text(size=24),
+                   plot.subtitle=element_text(size=30),
                    plot.caption = element_text(size = 20,hjust = 0),
                    legend.text = element_text(size = 20,hjust = 0),
                    legend.title = element_text(size = 21,hjust = 0)

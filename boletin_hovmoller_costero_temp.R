@@ -1,5 +1,6 @@
-hovmoller_costero <- function(lista,poligono,variable,lim.lat,franja){
+hovmoller_costero <- function(lista,poligono,variable,lim.lat,franja, filtro){
   require('metR')
+  require('WaveletComp')
   poligono <- as.data.frame(poligono)
   
   names(poligono) <- c('lon','lat')
@@ -17,7 +18,7 @@ hovmoller_costero <- function(lista,poligono,variable,lim.lat,franja){
   
   malla <- expand.grid(lon=lon,lat=lat)
   
-  ####### ARMADO DE LA MATRIZ DE DATOS QUE ESTÁN DENTRO DEL POLÍGONO ########
+  ####### ARMADO DE LA MATRIZ DE DATOS QUE EST?N DENTRO DEL POL?GONO ########
   
   close.nc(ncin)
   
@@ -56,28 +57,93 @@ hovmoller_costero <- function(lista,poligono,variable,lim.lat,franja){
     
   }
   
+############FILTRO PASA BANDA DE 10 A 120 DIAS##################
   
-  
+  filtro_wavelet <- function(x) {
+    if (all(is.na(x))){
+      return(x)
+    }
+    N <- length(x)
+    
+    hay_nan <- any(is.na(x))
+    df <- data.frame(x = x)  
+    y_wavelet <-   analyze.wavelet(my.data = df,
+                                   loess.span = 1,
+                                   dt = 1, dj = 1/250,
+                                   lowerPeriod = 10,
+                                   upperPeriod = 120,
+                                   make.pval = TRUE, n.sim=10,
+                                   verbose = FALSE)
+    
+    y_rec <- reconstruct(y_wavelet, plot.waves = FALSE,
+                         verbose = FALSE )               
+    graphics.off()
+    resultado <- y_rec$series$x.r
+    # print(y_rec)
+    return( resultado )
+  }
+  ###################################################################   
+  if(filtro){
+    datos <- apply(datos, MARGIN = 1,
+                   FUN=function(x) {filtro_wavelet(x)}
+    )
+    if(franja=='50') franja <- '60'
+    datos <- t(datos)
+    # niveles <- seq(-12,12,by=1)
+    # niveles2 <- seq(-12,12,by=2)
+    # paleta_color <- cptcity::cpt('ncl_BlueWhiteOrangeRed', n=19)
+    # 
+    # paleta_color <- c(paleta_color[1:9],
+    #                   paleta_color[10],paleta_color[10],
+    #                   paleta_color[10],paleta_color[10],
+    #                   paleta_color[11:19])
+    subtitulo <- paste0('TSM: del ',
+                        format(fecha.anterior,'%B-%d-%Y'),' a ',
+                        format(fecha.actual,'%B-%d-%Y'),
+                        '\nFranja de ',franja,' millas\n',
+                        'Filtro pasabanda de 10 a 120 dÃ­as')
+    
+    malla <- expand.grid(lat=latitudes,tiempo=tiempo)
+    
+    Z <- stack( as.data.frame(datos) )
+    
+    
+    hovmoller <- data.frame( tiempo = as.matrix(malla$tiempo),
+                             lat = as.matrix(malla$lat),
+                             atsm = as.matrix(Z$values)  )
+    
+    
+  }else{
+    
+    malla <- expand.grid(lat=latitudes,tiempo=tiempo)
+    
+    Z <- stack( as.data.frame(datos) )
+    
+    
+    hovmoller <- data.frame( tiempo = as.matrix(malla$tiempo),
+                             lat = as.matrix(malla$lat),
+                             atsm = as.matrix(Z$values)  )
+    
+    suave <- mgcv::gam(atsm~te(tiempo,lat,k=c(20,20)),data=hovmoller )
+    
+    pred <- predict(suave,newdata = as.data.frame(malla))
+    
+    Z <- as.matrix(pred)
+    hovmoller <- data.frame( tiempo = malla$tiempo,
+                             lat = as.matrix(malla$lat),
+                             atsm = Z  )
+    
+  } 
   ######### DIAGRAMA DE HOVMOLLER ################
-  malla <- expand.grid(lat=latitudes,tiempo=tiempo)
+   
+####################################################################  
+
+ #########################################
   
-  Z <- stack( as.data.frame(datos) )
   
   
-  hovmoller <- data.frame( tiempo = as.matrix(malla$tiempo),
-                           lat = as.matrix(malla$lat),
-                           atsm = as.matrix(Z$values)  )
   
-  suave <- mgcv::gam(atsm~te(tiempo,lat,k=c(20,15)),data=hovmoller )
-  
-  pred <- predict(suave,newdata = as.data.frame(malla))
-  
-  Z <- as.matrix(pred)
-  hovmoller <- data.frame( tiempo = malla$tiempo,
-                           lat = as.matrix(malla$lat),
-                           atsm = Z  )
-  
- 
+#############################################  
   indcT <- grep( '[0-9]*-[0-9]*-01',as.Date(tiempo/86400,origin='1981-01-01')  )
   
   marcas.fecha<- tiempo[indcT]
@@ -94,21 +160,23 @@ hovmoller_costero <- function(lista,poligono,variable,lim.lat,franja){
   
   etqt.fecha <- etqt.fecha[indcOrden$ix]
 
-  titulo.fig <- paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                       'Dpto. de Oceanografía - Div. Oceanografía')
+  titulo.fig <- paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                       'Dpto. de OceanografÃ­a - Div. OceanografÃ­a')
   if (pracma::strcmp(variable,'sst_anomaly')){
     niveles <- seq( from=-6,to=6,by=0.5 )
-    subtitulo <- 'Anomalía de la Temperatura Superficial del Mar: '
-    titulo.barra <- 'ATSM\n°C'
+    subtitulo <- 'AnomalÃ­a de la Temperatura Superficial del Mar: '
+    titulo.barra <- 'ATSM\nÂ°C'
   }else{
     niveles <-  seq( from=10,to=30,by=1)
-
     subtitulo <- 'Temperatura Superficial del Mar: '
-    titulo.barra <- 'TSM\n°C'
+    titulo.barra <- 'TSM\nÂ°C'
   }
   
-  paleta_color <- cptcity::cpt('ncl_amwg_blueyellowred')
-
+  paleta_color <- cptcity::cpt('ncl_amwg_blueyellowred',12)
+##############################################
+  # paleta_color <- c(paleta_color[1:6],'#FFFFFF','#FFFFFF',paleta_color[7:12])
+  
+################################################  
   marcas_y <- seq(lim.lat[1],lim.lat[2],by=2)
   etiquetas_y <- unlist(lapply( as.vector(marcas_y),
                                 function(x) if( x<0 ) {paste0(-x,'S')}else if(x>0){paste0(x,'N')}else{x} )   )
@@ -124,7 +192,10 @@ hovmoller_costero <- function(lista,poligono,variable,lim.lat,franja){
   #                              breaks = niveles)
   # 
   pp <- pp + geom_text_contour(data=hovmoller,aes(x=tiempo,y=lat,z=atsm,label=..level..),
-                               rotate=FALSE,size=12,stroke=0.15,
+                               rotate=FALSE,
+                               size=12,
+                               stroke=0.15,
+                               min.size = 30,
                                check_overlap = TRUE)
   # pp <- pp + geom_dl(data=hovmoller,aes(x=tiempo,y=lat,z=atsm,label=..level..),
   #                    breaks = niveles,col='black', method=list('bottom.pieces', cex=1.3), stat="contour")
@@ -136,7 +207,7 @@ hovmoller_costero <- function(lista,poligono,variable,lim.lat,franja){
                                   format(fecha.anterior+1,'%B-%d-%Y'),' a ',
                                   format(fecha.actual,'%B-%d-%Y'),
                                   paste0('\nFranja de ',franja,' millas')),
-                  caption='Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)\nClimatología: 1981-2009')
+                  caption='Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)\nClimatologÃ­a: 1981-2009')
  
   pp <- pp + scale_x_continuous( breaks = marcas.fecha,
                                  labels = etqt.fecha,
@@ -159,7 +230,7 @@ hovmoller_costero <- function(lista,poligono,variable,lim.lat,franja){
                    axis.title.x = element_text( size = 40 ),
                    axis.title.y = element_text( size = 40 ),
                    title = element_text( size = 26 ),
-                   plot.subtitle = element_text(size = 28),
+                   plot.subtitle = element_text(size = 32),
                    plot.caption = element_text( size = 28,hjust = 0),
                    axis.ticks.length=unit(.25, "cm"))
   return(pp)

@@ -19,7 +19,7 @@ hovmoller_costero_salinidad <- function(lista,poligono,lim.lat,franja){
   
   malla <- expand.grid(lon=lon,lat=lat)
   
-  ####### ARMADO DE LA MATRIZ DE DATOS QUE ESTÁN DENTRO DEL POLÍGONO ########
+  ####### ARMADO DE LA MATRIZ DE DATOS QUE ESaTN DENTRO DEL POLiGONO ########
   
   close.nc(ncin)
   
@@ -71,7 +71,7 @@ hovmoller_costero_salinidad <- function(lista,poligono,lim.lat,franja){
   
   suave <- mgcv::gam(sal~te(tiempo,lat,k=c(20,15)),data=hovmoller )
   # tiempo2 <- as.Date(tiempo/24,origin='1950-01-01')
-  tiempo <- seq(from=min(tiempo,na.rm = TRUE), to= tiempo[length(tiempo)],by=24)
+  tiempo <- seq(from=min(tiempo,na.rm = TRUE), to= max(tiempo,na.rm = TRUE),by=24)
   malla <- expand.grid(lat = latitudes,tiempo = tiempo)
   
   pred <- predict(suave,newdata = as.data.frame(malla))
@@ -101,16 +101,16 @@ hovmoller_costero_salinidad <- function(lista,poligono,lim.lat,franja){
   # 
   # etqt.fecha <- etqt.fecha[indcOrden$ix]
   
-  titulo.fig <- paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                       'Dpto. de Oceanografía - Div. Oceanografía')
+  titulo.fig <- paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                       'Dpto. de OceanografÃa - Div. OceanografÃa')
 
     
     subtitulo <- 'Salinidad: '
     titulo.barra <- 'UPS'
   
   # paleta_color <- cptcity::cpt('ncl_StepSeq25')
-    niveles <- c(seq(31,34.7,by=0.1),seq(34.8,35.1,by=0.1),seq(35.2,36.2,by=0.1))
-    niveles_barra <- c(seq(from=31,to=34.7,by=0.4),c(34.8,35.1),seq(35.4,36.2,by=0.4))
+    niveles <- c(seq(31,36.2,by=0.2))
+    niveles_barra <- c(seq(from=31,to=34.7,by=0.8),c(34.8,35.1, by=0.75),seq(35.4,36.2,by=0.8))
     
     paleta01 <- colorRampPalette(colors = c("#FF0000","#FF0200","#FF0500","#FF0700","#FF0A00","#FF0C00","#FF0F00","#FF1200","#FF1400",
                                             "#FF1700","#FF1900","#FF1C00","#FF1E00","#FF2100","#FF2400","#FF2600","#FF2900","#FF2B00",
@@ -147,7 +147,7 @@ hovmoller_costero_salinidad <- function(lista,poligono,lim.lat,franja){
   png(width=1200, height=1200, filename = paste0(raiz,'figuras/hovmoller_salinidad.png'  ))
   pp <- ggplot( data=hovmoller,aes(x=tiempo,y=lat,fill=sal) )
   pp <- pp + geom_raster(aes(fill = sal),interpolate=TRUE,show.legend = TRUE  )
-  pp <- pp + scale_fill_gradientn(colours= paleta_color,limits =range(niveles),breaks=niveles_barra)
+  pp <- pp + scale_fill_gradientn(colours= paleta_color,limits =range(niveles),breaks=niveles)
   pp <- pp + stat_contour(data=hovmoller, aes(x=tiempo,y=lat,z=sal),
                           breaks = niveles,col='black' ,inherit.aes=FALSE )
   
@@ -156,7 +156,7 @@ hovmoller_costero_salinidad <- function(lista,poligono,lim.lat,franja){
   #                              breaks = niveles)
   # 
   pp <- pp + geom_text_contour(data=hovmoller,aes(x=tiempo,y=lat,z=sal,label=..level..),
-                               rotate=FALSE,size=12,stroke=0.15,
+                               rotate=FALSE,size=12,stroke=0.10,
                                check_overlap = TRUE)
   # pp <- pp + geom_dl(data=hovmoller,aes(x=tiempo,y=lat,z=atsm,label=..level..),
   #                    breaks = niveles,col='black', method=list('bottom.pieces', cex=1.3), stat="contour")
@@ -168,7 +168,7 @@ hovmoller_costero_salinidad <- function(lista,poligono,lim.lat,franja){
                                   format(as.Date(tiempo[1]/24,origin='1950-01-01'),'%B-%d-%Y'),' a ',
                                   format(as.Date(tiempo[length(tiempo)]/24,origin='1950-01-01'),'%B-%d-%Y'),
                                   paste0('\nFranja de ',franja,' millas')),
-                  caption='Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)\nClimatología: 1981-2009')
+                  caption='Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)\nClimatolog?a: 1981-2009')
   
   pp <- pp + scale_x_continuous( breaks = marcas.fecha,
                                  labels = etqt.fecha,
@@ -190,8 +190,8 @@ hovmoller_costero_salinidad <- function(lista,poligono,lim.lat,franja){
                    axis.text.y = element_text( size = 34,color='black' ),
                    axis.title.x = element_text( size = 40 ),
                    axis.title.y = element_text( size = 40 ),
-                   title = element_text( size = 26 ),
-                   plot.subtitle = element_text(size = 28),
+                   title = element_text( size = 30 ),
+                   plot.subtitle = element_text(size = 34),
                    plot.caption = element_text( size = 22,hjust = 0),
                    axis.ticks.length=unit(.25, "cm"))
   plot(pp)

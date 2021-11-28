@@ -21,7 +21,7 @@ mapa_diferencias <- function( mapa, fecha.inicial, fecha.final, limites.lon, lim
   
   niveles <- seq(-5,5,by=0.5)
   subtitulo.graf <- 'Diferencias semanales de la Temperatura Superficial del Mar'
-  titulo.barra <- 'Temp.\n(°C)'
+  titulo.barra <- 'Temp.\n (Â°C)'
   subtitulo.grafico <- paste0(subtitulo.graf,':\ndel ',
                               format(fecha.inicial,format='%d-%B'),' al ',
                               format(fecha.final,format='%d-%B-%Y'))
@@ -94,10 +94,10 @@ mapa_diferencias <- function( mapa, fecha.inicial, fecha.final, limites.lon, lim
                                 breaks = marcas_y,
                                 labels = etiquetas_y)
   pp <- pp + labs(x='Longitud',y='Latitud',
-                  title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                               'Dpto. de Oceanografía - Div. Oceanografía'),
+                  title=paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                               'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
                   subtitle = subtitulo.grafico,
-                  caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatología: 1981-2009')
+                  caption = 'Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0).\nClimatolog?a: 1981-2009')
   #pp <- pp + coord_cartesian(xlim=c(282,283),ylim=c(-13,-10))
   pp <- pp + theme_bw(   )
 

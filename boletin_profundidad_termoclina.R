@@ -36,7 +36,7 @@ datos <- brick(salida)
 ## 1:40 POT ; 41:80 SAL ; 81:20 UOGRD ; 121:160 VOGRD ; 161:200 DZDT ; 201 isoterma
 ## 202 capa de mezcla ; 203:207 informacion irrelevante
 
-#################POLÍGONO PARA PROMEDIAR#####################
+#################POL?GONO PARA PROMEDIAR#####################
 
 load(rdata.arch) #### VARIABLE costa
 
@@ -141,8 +141,8 @@ pp <- pp + scale_x_reverse(limits=rev(c(-20,2)),
 pp <- pp + theme_bw()
 
 pp <- pp + labs(x = 'Latitud',y = 'Profundidad (m)',
-                title = paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                               'Dpto. de Oceanografía - Div. Oceanografía'),
+                title = paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                               'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
                 subtitle = paste0('Temperatura Potencial: Pentada del ',
                                   format(as.Date(fecha,format='%Y%m%d'),format='%d de %B de %Y'),
                                   '\nFranja de 50 millas'),
@@ -157,7 +157,7 @@ pp <-  pp + theme( axis.title.x = element_text( size=20,hjust=0.5  ),
 pp <- pp + guides( fill = guide_colorbar(barheight = unit(20, "cm"),
                                          barwidth = unit(1,'cm'),
                                          label.theme = element_text(size=18),
-                                         title = '°C',title.theme = element_text(size=18)))
+                                         title = '?C',title.theme = element_text(size=18)))
 
 plot(pp)
 dev.off()
@@ -166,7 +166,7 @@ dev.off()
 
 temp.GODAS <- mapa.nuevo
 
-load('E:/GODAS_1989-2009/climatologia_GODAS_1989-2009.RDat')
+load('E:/programasR/climatologia_GODAS_1981-2009.RDat')
 
 anomalia.Temp <- data.frame( lat = mapa.nuevo$lat,prof = mapa.nuevo$prof, 
                              pot = mapa.nuevo$pot - temp.GODAS$pot)
@@ -195,12 +195,12 @@ pp <- pp + scale_x_reverse(limits=rev(range(x)),
 pp <- pp + theme_bw()
 
 pp <- pp + labs(x = 'Latitud',y = 'Profundidad (m)',
-                title = paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                               'Dpto. de Oceanografía - Div. Oceanografía'),
-                subtitle = paste0('Anomalía de Temperatura Potencial: Pentada del ',
+                title = paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                               'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
+                subtitle = paste0('AnomalÃ­a de Temperatura Potencial: Pentada del ',
                                   format(as.Date(fecha,format='%Y%m%d'),format='%d de %B de %Y'),
                                   '\nFranja de 50 millas'),
-                caption = 'Fuente: Global Ocean Data Assimilation System (GODAS)\nClimatología: 1989-2009\nhttps://cfs.ncep.noaa.gov/cfs/godas/pentad/')
+                caption = 'Fuente: Global Ocean Data Assimilation System (GODAS)\nClimatolog?a: 1989-2009\nhttps://cfs.ncep.noaa.gov/cfs/godas/pentad/')
 
 pp <-  pp + theme( axis.title.x = element_text( size=20,hjust=0.5  ),
                    axis.title.y = element_text( size=20,hjust=0.5  ),
@@ -211,7 +211,7 @@ pp <-  pp + theme( axis.title.x = element_text( size=20,hjust=0.5  ),
 pp <- pp + guides( fill = guide_colorbar(barheight = unit(20, "cm"),
                                          barwidth = unit(1,'cm'),
                                          label.theme = element_text(size=18),
-                                         title = '°C',title.theme = element_text(size=18)))
+                                         title = 'Â°C',title.theme = element_text(size=18)))
 
 plot(pp)
 dev.off()

@@ -48,7 +48,28 @@ boletin_estaciones_anm <- function(lista,puntos,fecha.anterior,fecha.actual){
  tiempo[ii,1] <- var.get.nc(ncin,variable = 'time')
  close.nc(ncin)
  }
- 
+
+       rr <- butterworth.wge(x = nivel.Balta,
+                             order = 5,
+                             type = 'pass',
+                             cutoff = c(1/120, 1/10),
+                             plot=FALSE)
+       nivel.Balta <- rr$x.filt
+       
+       rr <- butterworth.wge(x = nivel.Talara,
+                             order = 5,
+                             type = 'pass',
+                             cutoff = c(1/120, 1/10),
+                             plot=FALSE)
+       nivel.Talara <- rr$x.filt       
+
+       rr <- butterworth.wge(x = nivel.Chimbo,
+                             order = 5,
+                             type = 'pass',
+                             cutoff = c(1/120, 1/10),
+                             plot=FALSE)
+       nivel.Chimbo <- rr$x.filt       
+       
        tiempo <- rbind(tiempo,tiempo,tiempo)
           anm <- rbind(nivel.Balta,nivel.Talara,nivel.Chimbo)
           est <- rbind( as.matrix(replicate(narchs,'Galapagos')   ,nrow=narchs,ncol=1),
@@ -56,6 +77,7 @@ boletin_estaciones_anm <- function(lista,puntos,fecha.anterior,fecha.actual){
                         as.matrix(replicate(narchs,'Chimbote'),nrow=narchs,ncol=1))
  balta.lon <- lon[indc.lon.Balta]-360
  balta.lat <- lat[indc.lat.Balta]
+ 
  
   grafica <- data.frame(    T = as.POSIXct(tiempo*86400,origin='1950-01-01'), 
                           anm = anm,
@@ -66,19 +88,19 @@ save(file = 'datosNivel.Rdata',guardar)
  pp <- ggplot(data=grafica,aes(x=T,y=anm,colour=EST))
  pp <- pp + scale_x_datetime(breaks = 'month')
  pp <- pp + geom_path(size=1.5)
- pp <- pp + scale_color_manual(name='ESTACIÓN',values=c('Galapagos'='red','Talara'='blue','Chimbote'='green'))
+ pp <- pp + scale_color_manual(name='ESTACIÃ“N',values=c('Galapagos'='red','Talara'='blue','Chimbote'='green'))
  pp <- pp + theme_bw()
- pp <- pp + labs(x= 'Fecha',y='Anomalía nivel del mar (cm)',
-                 title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                              'Dpto. de Oceanografía - Div. Oceanografía'),
+ pp <- pp + labs(x= 'Fecha',y='AnomalÃ­a nivel del mar (cm)',
+                 title=paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                              'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
                  subtitle=paste0('Nivel del mar'),
                  caption=paste0('Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)',
-                                ' Climatología: 1993-2012'))
+                                ' ClimatologÃ­a: 1993-2012'))
  pp <- pp + theme( axis.title.x = element_text( size=24,hjust=0.5  ),
                    axis.title.y = element_text( size=24,hjust=0.5  ),
                    axis.text = element_text(size=20),
                    title=element_text(size=26),
-                   plot.subtitle=element_text(size=24),
+                   plot.subtitle=element_text(size=32),
                    plot.caption = element_text(size = 20,hjust = 0),
                    legend.text = element_text(size = 20,hjust = 0),
                    legend.title = element_text(size = 21,hjust = 0)

@@ -19,8 +19,8 @@ setwd('E:/programasR/boletin/')
 #fecha.actual <- 
 
 #hoy <- lubridate::today() 
-fecha.inicial <- as.Date('2021-03-01')
-fecha.final <- lubridate::today() - 1
+fecha.inicial <- as.Date('2021-11-01')
+fecha.final <- lubridate::today() - 2
 
 # fecha.final <- lubridate::today() - 1
 dia <- lubridate::day(fecha.final) 
@@ -28,9 +28,20 @@ dia <- lubridate::day(fecha.final)
 # 
 # fecha.inicial <- fecha.final - dias.atras# - dias.atras
 
-periodo <- 'mensual'
-intervalo <- paste(lubridate::day(fecha.final)-1,'days')
-secuencia <- seq(from=fecha.inicial, to=fecha.final,by=intervalo)
+periodo <- 'semanal'
+
+if (periodo == 'semanal'){
+  dias <- seq(from=fecha.inicial,to=fecha.final,by='7 days')
+  if (as.numeric(fecha.final-fecha.inicial)%%7>0){
+    secuencia <- c(dias, fecha.final)
+  }
+}else{                                                            
+  intervalo <- paste(as.numeric(fecha.final-fecha.inicial)-1,'days')
+  secuencia <- seq(from=fecha.inicial,to=fecha.final,by=intervalo)
+}
+
+#intervalo <- paste(as.numeric(fecha.final-fecha.inicial)-1,'days')
+#secuencia <- seq(from=fecha.inicial, to=fecha.final,by=intervalo)
 
 carpeta <-lapply(unique(format(secuencia,format='%Y/%m')),
                  function(x) paste0('E:/boletin/viento/',lubridate::year(fecha.inicial),'/datos/') )
@@ -111,12 +122,12 @@ destino <- mapply(FUN=function(x,y){
  
 if (length(destino>0)){
   mapply(FUN = function(a,b){
-    info <- url.exists(url, .header=TRUE)
+    info <- url.exists(url, header=TRUE)
     tamanio <- as.numeric(info['Content-Length']) 
     print(tamanio)
     if(!file.exists(b) ){
     download.file( url= a, destfile= b,
-                   method = "auto",quiet = FALSE, mode="wb", cacheOK = TRUE  )
+                   method = "wininet",quiet = FALSE, mode="wb", cacheOK = TRUE  )
     closeAllConnections()}
     },
      a=bajar,b=destino
@@ -182,7 +193,8 @@ for (ii in 1:length(lista.ArchsAnalisis) ) {
       lat <- ncvar_get(ncId,'lat') 
       nc_close(ncId)},
       error=function(e) {e
-        .GlobalEnv$falla <- .GlobalEnv$falla + 1 })
+        .GlobalEnv$falla <- .GlobalEnv$falla + 1
+        file.remove(lista.dia[jj])})
          kk <- kk + 1
        }else{
          break
@@ -257,7 +269,7 @@ if(exists('pp')) rm(list='pp')
 fecha.inicial <- as.Date(lista.fechas[[ii]][1],format = '%Y%m%d')
 fecha.final <- as.Date(lista.fechas[[ii]][length(lista.fechas[[ii]])],format = '%Y%m%d')
 
-png(file=paste0(figuras,'mapa_viento_', fecha.inicial,'_',fecha.final,  '.png'),width=1000,height=1200)
+png(file=paste0(figuras,'mapa_viento_',periodo,'_',fecha.inicial,'_',fecha.final,  '.png'),width=1000,height=1200)
 pp <- ggplot(data=vientos.i,aes(x=lon,y=lat,fill=mag))
 pp <- pp + geom_raster(data=vientos.i,aes(x=lon,y=lat,fill=mag),interpolate=TRUE)
 
@@ -284,9 +296,9 @@ pp <- pp + scale_y_continuous(limits = c(-20,2),
                               expand = c(0,0))
 #pp <- pp + coord_cartesian(xlim=c(282,283),ylim=c(-13,-10))
 pp <- pp + labs(x='Longitud',y='Latitud',
-                title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                             'Dpto. de Oceanografía - Div. Oceanografía\n',
-                              'Campo de Viento\n','Del ',format(fecha.inicial,format='%d %B del %Y'),' al ',
+                title=paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                             'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
+                subtitle = paste0('Campo de Viento\n','Del ',format(fecha.inicial,format='%d %B del %Y'),' al ',
                              #'Campo de Viento\n','Del ',format(fecha.inicial-dias.atras,format='%d %B del %Y')),
                              format(fecha.final,format='%d %B del %Y')),
                 caption='Fuente: IFREMER CERSAT Global Blended Mean Wind Fields on 25km X 25km grid')
@@ -294,7 +306,8 @@ pp <- pp + theme_bw()
 pp <- pp + theme( axis.title.x = element_text( size = 28,hjust=0.5  ),
                   axis.title.y = element_text( size = 28,hjust=0.5  ),
                   axis.text = element_text( size = 20),
-                  title = element_text( size = 32),
+                  plot.title = element_text( size = 32),
+                  plot.subtitle=element_text( size = 38) ,
                   plot.caption = element_text( size = 18,hjust = 0))
 
 pp <- pp + guides( fill = guide_colorbar(  barheight = unit(20, "cm"),
@@ -378,16 +391,17 @@ pp <- pp + scale_y_continuous(limits = c(-20,2),
                               expand = c(0,0))
 
 pp <- pp + labs(x='Longitud',y='Latitud',
-                title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                             'Dpto. de Oceanografía - Div. Oceanografía\n','Anomalía del Campo de Viento\n',
-                             'Del ',format(fecha.inicial,format='%d %B del %Y'),' al ',  
+                title=paste0('DIRECCIÃ“N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                             'Dpto. de OceanografÃ­a - Div. OceanografÃ­a\n','AnomalÃ­a del Campo de Viento'),
+                subtitle=paste0('Del ',format(fecha.inicial,format='%d %B del %Y'),' al ',  
                              format(fecha.final,format='%d %B del %Y')),
                 caption='Fuente: IFREMER CERSAT Global Blended Mean Wind Fields on 25km X 25km grid
-                Climatología: QUIKSCAT-ASCAT 2000-2014' )
+                ClimatologÃ­a: QUIKSCAT-ASCAT 2000-2014' )
 pp <- pp + theme( axis.title.x = element_text( size=28,hjust=0.5  ),
                   axis.title.y = element_text( size=28,hjust=0.5  ),
                   axis.text = element_text(size=28),
-                  title=element_text(size=32),
+                  plot.title=element_text(size=32),
+               plot.subtitle=element_text(size=38),
                   plot.caption = element_text(size = 18,hjust = 0))
 pp <- pp + guides( fill = guide_colorbar(  barheight = unit(20, "cm"),
                                            barwidth = unit(2,'cm'),

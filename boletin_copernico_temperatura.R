@@ -30,10 +30,10 @@ t0.copernico <- as.Date('1981-01-01') # segundos desde esta fecha
 
 # dias.atras <- lubridate::yday(lubridate::today() )
 
-fecha.inicial <- as.Date('2021-03-01')
-fecha.final <- lubridate::today() - 1
+fecha.inicial <- as.Date('2021-11-01')
+fecha.final <- lubridate::today() - 2
 
-dias.atras.hov <- 30*6 + 1 
+dias.atras.hov <- 30*6 + 2 
 
 #for (ii in seq(from=as.Date('2019-07-02'),to=as.Date('2019-07-31'),by='day')){
 #  fecha.actual <- as.Date(ii,origin='1970-01-01')  #as.Date('2019-07-02')
@@ -43,11 +43,11 @@ dias.atras.hov <- 30*6 + 1
 periodo <- 'mensual'
 
 if (periodo=='mensual'){
-  intervalo <- paste(lubridate::day(fecha.final)-1,'days')
+  intervalo <- paste(fecha.final- fecha.inicial-1,'days')
   dias <- seq(from=fecha.inicial, to=fecha.final,by=intervalo)  
 }else{
   dias <- seq(from=fecha.inicial, to=fecha.final,by='7 days')
-  if ((lubridate::day(fecha.final)-lubridate::day(fecha.inicial))%%7>0){
+  if (as.numeric(fecha.final-fecha.inicial)%%7>0){
     dias <- c(dias, fecha.final)
   }
 }
@@ -91,7 +91,7 @@ for (ii in 1:nMapas ){
   #archivo.hoy <- archivos
 
 ######## MAPA COSTERO DE TEMPERATURA MENSUAL ######
-  source('boletin_mapa_costero_temp.R')
+  source('boletin_mapa_costero_temp.R', encoding = 'utf-8')
   lim.lon <- c(270, 290)
   lim.lat <- c(-20, 2)
   # archivo.hoy <- last(archivos)
@@ -114,7 +114,7 @@ for (ii in 1:nMapas ){
   
 ######## MAPA COSTERO DE ANOMALIA DE TEMPERATURA MENSUAL#######
 
-  source('boletin_mapa_costero_temp.R')
+  source('boletin_mapa_costero_temp.R', encoding = 'utf-8')
   lim.lon <- c(270, 290)
   lim.lat <- c(-20, 2)
   mapa_costero_an <- mapa_costero_temp(archivos,'sst_anomaly',
@@ -128,7 +128,7 @@ for (ii in 1:nMapas ){
   
 ####### MAPA ECUATORIAL DE ANOMALIA DE TEMPERATURA MENSUAL #######
 
-  source('boletin_mapa_costero_temp.R')
+  source('boletin_mapa_costero_temp.R', encoding = 'utf-8')
   # if (exists('mapa_costero')) rm(mapa_costero)
   lim.lon <- c(120,290)
   lim.lat <- c(-25,25)
@@ -140,12 +140,30 @@ for (ii in 1:nMapas ){
       width=2400,height=850)
   plot(mapa_costero_ec)
   dev.off()
+
+
+####### MAPA ECUATORIAL DE ANOMALIA DE TEMPERATURA MENSUAL ersstV5 #######
+
+source('boletin_mapa_costero_temp_ersstV5.R', encoding = 'utf-8')
+# if (exists('mapa_costero')) rm(mapa_costero)
+lim.lon <- c(120,290)
+lim.lat <- c(-25,25)
+archivo_rsstV5 <- 'E:/boletin/datos/temp/erssTV5/ersst.v5.202110.nc'
+mapa_costero_ec <- mapa_costero_temp_ersstV5(archivo_rsstV5,'ssta',
+                                     lim.lon,lim.lat,fecha.anterior,
+                                     fecha.actual, poner_boyas=FALSE)
+
+png(filename = paste0('E:/boletin/datos/temp/erssTV5/figuras/','mapa_ecua_atsm_','mensual','.png'),
+    width=2400,height=850)
+plot(mapa_costero_ec)
+dev.off()
+##################
 }
 
 ############ DIFERENCIAS SEMANALES ##########################
 
 if (periodo == 'semanal'){
-  source('mapa_diferencias_semanales_temp.R')
+  source('mapa_diferencias_semanales_temp.R', encoding = 'utf-8')
   lim.lon <- c(270, 290)
   lim.lat <- c(-20, 2)
   
@@ -162,7 +180,7 @@ if (periodo == 'semanal'){
 }
 
 ############ POLIGONO PARA HOVMOLLER COSTEROS ###############
-
+if(periodo == 'mensual'){
 poli50 <- matrix(c(-78.58496522661444,1.021363921916344,
                    -78.50821467634449,1.995645822855158,
                    -80.30572848827556,2.025213831709041,
@@ -216,7 +234,7 @@ poliRegional <- matrix(c(-79.25718437360111,-0.02045551295067481,
                          -79.25718437360111,-0.02045551295067481),nrow=25,ncol=2,byrow=TRUE)
 ###################################
 # fecha.actual <- lubridate::today() -1
-# dias.atras.hov <- 30*18+ 14 
+# dias.atras.hov <- 30*30+ 14 
 fecha.anterior <- fecha.actual - dias.atras.hov  # en d?as
 # dias.atras.hov <- as.numeric(fecha.actual-fecha.anterior)
 # dias.atras <- dias.atras.hov
@@ -235,25 +253,39 @@ if (prueba){
 }
 archivos <- salida[[1]]
 boletin.dir <- salida[[2]]
-rm('salida')
+if(exists('salida')){rm('salida')}
 archivo.hoy <- archivos
+#########################
 
-####### HOVMOLLER COSTERO DE DE ANOMAL?A TEMPERATURA ############
+# lista_02 <- archivos[seq(1,length(archivos), by = 9)]
+lista_02 <- archivos
 
-source('boletin_hovmoller_costero_temp.R') 
+####### HOVMOLLER COSTERO DE DE ANOMALÍA TEMPERATURA ############
+
+source('boletin_hovmoller_costero_temp.R', encoding = 'utf-8') 
 
 lim.lat <- c(-20, 2)
-hovmoller_costero_atsm <- hovmoller_costero(lista=archivos,poligono=poli50,'sst_anomaly',lim.lat,'50')
+hovmoller_costero_atsm <- hovmoller_costero(lista=lista_02,
+                                            poligono=poli50,
+                                            'sst_anomaly',
+                                            lim.lat,
+                                            '50',
+                                            filtro=0)
 
 png(filename = paste0(boletin.dir,'hovmoller_costero_atsm',fecha.actual,'.png'),
     width=1600,height=1000)
 plot(hovmoller_costero_atsm)
 dev.off()
 
-###### HOVMOLLER COSTERO DE TEMPERATURA ######
-
-source('boletin_hovmoller_costero_temp.R')
-hovmoller_costero_tsm <- hovmoller_costero(archivos,poli50,'analysed_sst',lim.lat,'50')
+###### HOVMOLLER COSTERO DE TEMPERATURA #################
+lim.lat <- c(-20, 2)
+source('boletin_hovmoller_costero_temp.R', encoding = 'utf-8')
+hovmoller_costero_tsm <- hovmoller_costero(lista_02,
+                                           poli50,
+                                           'analysed_sst',
+                                           lim.lat,
+                                           '50',
+                                           filtro=0)
 
 png(filename = paste0(boletin.dir,'hovmoller_costero_TSM_',fecha.actual,'.png'),
     width=1600,height=1000)
@@ -283,9 +315,9 @@ pp <- ggplot(data=promedios,aes(x=T,y=atsm))
 pp <- pp + geom_line(col='blue',size=2)
 pp <- pp + scale_x_datetime(date_breaks = 'month',date_labels = '%b-%Y' )
 pp <- pp + scale_y_continuous(limits = c(16,32) )
-pp <- pp + labs(x='Fecha',y='?C',
+pp <- pp + labs(x='Fecha',y='°C',
                 title='Promedio de la TSM dentro de las 50 millas',
-                caption='Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)\nClimatolog?a: 1981-2009')
+                caption='Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)\nClimatología: 1981-2009')
 pp <- pp + theme(axis.text.x = element_text( size = 24,color='black',angle=90 ),
                  axis.text.y = element_text( size = 34,color='black' ),
                  axis.title.x = element_text( size = 40 ),
@@ -302,25 +334,33 @@ save(file=paste0(boletin.dir,'indice_T_02.RData'),list = 'promedios')
 
 ############ HOVMOLLER ENTRE 50-200 MILLAS ########
 
-source('boletin_hovmoller_costero_temp.R')
+source('boletin_hovmoller_costero_temp.R', encoding = 'utf-8')
 load('E:/programasR/boletin/peru_poli_ENFEN.RData')# variable costa
 
 poli50_200 <- costa@polygons[[1]]@Polygons[[1]]@coords
 lim.lat <- c(-20, 2)
-hovmoller_costero <- hovmoller_costero(archivos,poli50_200,'sst_anomaly',lim.lat,'50 a 200')
+hovmoller_costero <- hovmoller_costero(lista_02,
+                                       poli50_200,
+                                       'sst_anomaly',
+                                       lim.lat,
+                                       '50 a 200',
+                                       filtro=0)
 
 png(filename = paste0(boletin.dir,'hovmoller_costero_atsm_50-200_',fecha.actual,'.png'),
     width=1600,height=1000)
 plot(hovmoller_costero)
 dev.off()
 
-##### HOVMOLLER ECUATORIAL DE ANOMAL?A DE TEMPERATURA ########
+##### HOVMOLLER ECUATORIAL DE ANOMALíA DE TEMPERATURA ########
 
 limites.lat <- c(-2,2)
 limites.lon <- c(140,290)
-source('boletin_hovmoller_ecuatorial_temp.R')
-hovmoller_ecuatorial <- hovmoller_ecuatorial_temp(archivos,'sst_anomaly',
-                                                  limites.lon,limites.lat)
+source('boletin_hovmoller_ecuatorial_temp.R', encoding = 'utf-8')
+hovmoller_ecuatorial <- hovmoller_ecuatorial_temp(lista_02,
+                                                  'sst_anomaly',
+                                                  limites.lon,
+                                                  limites.lat,
+                                                  suavizar=FALSE)
 
 png(file=paste0(boletin.dir, 'hovmoller_ecuatorial_atsm_', 
                 lubridate::today(), '.png'  ),
@@ -338,26 +378,91 @@ zona34 <- matrix(c(-120,-5,
                    -120,-5),
                  nrow=5,ncol=2,byrow=TRUE)
 
-source('boletin_hovmoller_costero_temp.R') 
+source('boletin_hovmoller_costero_temp.R', encoding = 'utf-8') 
 
 lim.lat <- c(-5, 5)
-hovmoller_zona34_atsm <- hovmoller_costero(lista=archivos,poligono=zona34,'sst_anomaly',lim.lat,'zona 3-4')
+hovmoller_zona34_atsm <- hovmoller_costero(lista=lista_02,
+                                           poligono=zona34,
+                                           'sst_anomaly',
+                                           lim.lat,
+                                           'zona 3-4',
+                                           filtro=0)
 
-png(filename = paste0(boletin.dir,'hovmoller_zona_34_atsm',fecha.actual,'.png'),
-    width=1600,height=1000)
-plot(hovmoller_zona34_atsm)
-dev.off()
 
 
+# png(filename = paste0(boletin.dir,'hovmoller_zona_34_atsm',fecha.actual,'.png'),
+#     width=1600,height=1000)
+#plot(hovmoller_zona34_atsm)
+#dev.off()
 
-hovmoller_zona34_tsm <- hovmoller_costero(lista=archivos,poligono=zona34,'analysed_sst',lim.lat,'zona 3-4')
+hovmoller_zona34_tsm <- hovmoller_costero(lista=lista_02,
+                                          poligono=zona34,
+                                          'analysed_sst',
+                                          lim.lat,
+                                          'zona 3-4',
+                                          filtro=0)
 
-png(filename = paste0(boletin.dir,'hovmoller_zona_34_tsm',fecha.actual,'.png'),
-    width=1600,height=1000)
-plot(hovmoller_zona34_tsm)
-dev.off()
+# png(filename = paste0(boletin.dir,'hovmoller_zona_34_tsm',fecha.actual,'.png'),
+#     width=1600,height=1000)
+#plot(hovmoller_zona34_tsm)
+#dev.off()
 ######################  Indices COSTEROS DE TEMPERATURA ########################
 
-source('boletin_indicesCosteros.R')
-indices <- indicesCosteros(hovmoller_costero_tsm, hovmoller_costero_atsm, hovmoller_zona34_tsm, hovmoller_zona34_atsm)
+source('boletin_indicesCosteros.R', encoding = 'utf-8')
+indices <- indicesCosteros(hovmoller_costero_tsm,
+                           hovmoller_costero_atsm,
+                           hovmoller_zona34_tsm,
+                           hovmoller_zona34_atsm,
+                           'E:/boletin/datos_atsm_34.RDS',
+                           imprimir=1)
 
+
+#################### HOVMOLLER ZONA 2 ##############################################
+
+zona2 <- matrix(c(-90,-10,
+                   -90,0,
+                   -70,0,
+                   -70,-10,
+                   -90,-10),
+                 nrow=5,ncol=2,byrow=TRUE)
+
+source('boletin_hovmoller_costero_temp.R', encoding = 'utf-8') 
+
+lim.lat <- c(-5, 5)
+hovmoller_zona2_atsm <- hovmoller_costero(lista=lista_02,
+                                          poligono=zona2,
+                                          'sst_anomaly',
+                                          lim.lat,
+                                          'zona 2',
+                                          filtro=0)
+
+
+
+# png(filename = paste0(boletin.dir,'hovmoller_zona_34_atsm',fecha.actual,'.png'),
+#     width=1600,height=1000)
+#plot(hovmoller_zona34_atsm)
+#dev.off()
+
+hovmoller_zona2_tsm <- hovmoller_costero(lista=lista_02,
+                                         poligono=zona34,
+                                         'analysed_sst',
+                                         lim.lat,
+                                         'zona 2',
+                                         filtro=0)
+
+# png(filename = paste0(boletin.dir,'hovmoller_zona_34_tsm',fecha.actual,'.png'),
+#     width=1600,height=1000)
+#plot(hovmoller_zona34_tsm)
+#dev.off()
+######################  Indices COSTEROS DE TEMPERATURA zona 2 ########################
+
+source('boletin_indicesCosteros.R', encoding = 'utf-8')
+indices <- indicesCosteros(hovmoller_costero_tsm,
+                           hovmoller_costero_atsm,
+                           hovmoller_zona2_tsm,
+                           hovmoller_zona2_tsm,
+                           'E:/boletin/datos_atsm_2.RDS',
+                           imprimir=0)
+
+
+}

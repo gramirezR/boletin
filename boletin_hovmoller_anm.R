@@ -44,7 +44,7 @@ require('metR')
                       lat = as.matrix(malla$lat),
                       z = as.matrix(Z$values)  )
   
-  ####### ARMADO DE LA MATRIZ DE DATOS QUE ESTÁN DENTRO DEL POLÍGONO ########
+  ####### ARMADO DE LA MATRIZ DE DATOS QUE EST?N DENTRO DEL POL?GONO ########
   
   close.nc(ncin)
   
@@ -143,12 +143,12 @@ require('metR')
                                  labels = etiquetas_y)
   
   pp <- pp + labs(x='Fecha',y='Latitud',
-                  title=paste0('DIRECCIÓN DE HIDROGRAFÍA Y NAVEGACIÓN \n',
-                               'Dpto. de Oceanografía - Div. Oceanografía'),
-                  subtitle=paste0('Anomalía del nivel del Mar: del ',
+                  title=paste0('DIRECCI?N DE HIDROGRAFÃA Y NAVEGACIÃ“N \n',
+                               'Dpto. de OceanografÃ­a - Div. OceanografÃ­a'),
+                  subtitle=paste0('AnomalÃ­a del nivel del Mar: del ',
                                   format(fecha.anterior,'%B-%d-%Y'),' a ',
                                   format(fecha.actual,'%B-%d-%Y'),'\nFranja de ',franja,' millas'),
-                  caption=paste0('Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)','\nClimatología: 1993-2012'))
+                  caption=paste0('Fuente: COPERNICUS MARINE ENVIRONMENT MONITORING SERVICE (CMEMS v3.0)','\nClimatolog?a: 1993-2012'))
   
   
   pp <- pp +  guides( fill = guide_colorbar(barheight = unit(25, "cm"),

@@ -45,7 +45,11 @@ require('RCurl')
     
     archivos[[ii]] <- unlist(strsplit(archivos[[ii]],'\r\n'))
     
-    lapply( archivos[[ii]],  function(x) if (!file.exists(paste0(datos.dir[[ii]], x))) {download.file( paste0(copernico[[ii]], x), paste0(datos.dir[[ii]], x),method = "auto",
+    lapply( archivos[[ii]],
+            function(x) if (!file.exists(paste0(datos.dir[[ii]], x))) {
+              download.file( paste0(copernico[[ii]], x),
+                             paste0(datos.dir[[ii]], x),
+                             method = "auto",
                                                                                                        quiet = FALSE, mode="wb", cacheOK = TRUE  )}   )
     
   }
@@ -72,7 +76,7 @@ require('RCurl')
       archivos[[ii]] <- lapply(lista,function(x) paste0(datos.dir[[ii]], x ))
     }
   }
-  ########### QUITAR DE LA LISTA ARCHIVOS CON MÁS TIEMPO DEL REQUERIDO #######
+  ########### QUITAR DE LA LISTA ARCHIVOS CON M?S TIEMPO DEL REQUERIDO #######
   
    archivos <- unlist(archivos)
   #   narchs <- length(archivos)
