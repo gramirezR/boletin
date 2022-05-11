@@ -2,7 +2,7 @@
 
 Mapa_boletin = setRefClass("Mapa_boletin",
                            fields = list(
-                                         malla = 'data.frame',
+                                         malla = 'list',
                                     parametros = 'list'
                                         )
                            )
@@ -10,9 +10,17 @@ Mapa_boletin = setRefClass("Mapa_boletin",
 
 Mapa_boletin$methods(
   crear_mapa = function(){
+    if (length(.self$malla)==3){
+        datos <- .self$malla[[1]]
+      datos$U <- .self$malla[[2]]$layer
+      datos$V <- .self$malla[[3]]$layer
+    }else{
+      datos <- .self$malla[[1]]
+      print(datos)
+    }
     options(encoding = "UTF-8")
     print(.self$parametros$archivo_salida)
-    pp <- ggplot2::ggplot( data = .self$malla,
+    pp <- ggplot2::ggplot( data = datos,
                             aes( x = x,
                                  y = y,
                                  z = layer,
@@ -25,8 +33,15 @@ Mapa_boletin$methods(
                             breaks = .self$parametros$niveles_barra) +
       ggplot2::stat_contour( linetype = 1 ,
                     col = 'black' ,
-                    breaks = .self$parametros$niveles) +
-      ggplot2::geom_polygon( data = .self$parametros$costa,
+                    breaks = .self$parametros$niveles)
+      if( length(.self$malla)==3 ){
+        
+          pp <-  pp + ggquiver::geom_quiver( aes( u = U, v = V ),
+                                             vecsize = 2,
+                                                size = 0.5  ) 
+                                  }
+      
+pp <- pp + ggplot2::geom_polygon( data = .self$parametros$costa,
                      aes( x = long,
                           y = lat,
                       group = group ),

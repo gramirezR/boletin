@@ -356,19 +356,18 @@ source('E:/programasR/boletin/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
 # lim.lat <- c(-25,25)
 #''nrt.cmems-du.eu/thredds/dodsC/METOFFICE-GLO-SST-L4-NRT-OBS-ANOM-V2'
 
-copernicus_temp_a <- Malla_escalar$new(url='nrt.cmems-du.eu/thredds/dodsC/METOFFICE-GLO-SST-L4-NRT-OBS-ANOM-V2',
-                                       usuario='gramirez2',
-                                       contra='$boletinDHN2018',
-                                       limites=data.frame( lon=c(270,292),
-                                                           lat=c(-20, 5)  ),
-                                       fecha=c( '2022-04-01',
-                                                '2022-05-01'
-                                       ),
-                                       profundidad= NaN,
-                                       variable='sst_anomaly',
-                                       nombreslonlat = c('lon', 'lat') ,
-                                       origen='1981-01-01',
-                                       unidad_t = 1)
+copernicus_temp_a <- Malla_escalar$new(    url = 'nrt.cmems-du.eu/thredds/dodsC/METOFFICE-GLO-SST-L4-NRT-OBS-ANOM-V2',
+                                       usuario = 'gramirez2',
+                                        contra = '$boletinDHN2018',
+                                       limites = data.frame( lon = c(270,292),
+                                                             lat = c(-20, 5)  ),
+                                         fecha = c( '2022-04-01' ,
+                                                    '2022-05-01' ),
+                                   profundidad = NaN ,
+                                      variable = 'sst_anomaly' ,
+                                 nombreslonlat = c( 'lon', 'lat' ) ,
+                                        origen = '1981-01-01' ,
+                                      unidad_t = 1 )
 
 temperatura_a <- copernicus_temp_a$bajar_datos()
 # 
@@ -376,6 +375,7 @@ promedio <- copernicus_temp_a$promedio_en_tiempo(temperatura_a)
 
 promedio <- copernicus_temp_a$como_dataframe( promedio )
 #
+
 source('E:/programasR/boletin/parametros_ggplot_temp_a.R', encoding = "UTF-8")
 
 parametros_mapa <- list(
@@ -397,7 +397,8 @@ parametros_mapa <- list(
   unidades = unidades
 )
 
-mapa_temperatura_a <- Mapa_boletin$new( malla = promedio,
+source('E:/programasR/boletin/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
+mapa_temperatura_a <- Mapa_boletin$new( malla = list(promedio),
                               parametros = parametros_mapa)
 
 mapa_temperatura_a$crear_mapa()
@@ -480,8 +481,6 @@ mapa_temperatura_a$crear_mapa()
 #                              promedio_vgosa/magnitud  )
 # 
 # #########################################################
-
-########################
 
 # ##################
 # windows()
