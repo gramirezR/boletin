@@ -246,7 +246,7 @@ Malla_escalar$methods(
 )
 
 ######################
-source('E:/programasR/boletin/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
+source('D:/programasR/boletin_2.0/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
 ##################
 
 # copernicus_sal <- Malla_escalar$new(url='nrt.cmems-du.eu/thredds/dodsC/global-analysis-forecast-phy-001-024-3dinst-so',
@@ -274,7 +274,7 @@ source('E:/programasR/boletin/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
 
 ##############
 
-# source('E:/programasR/boletin/parametros_ggplot_sal.R', encoding = "UTF-8")
+# source('E:/programasR/boletin_2.0/parametros_ggplot_sal.R', encoding = "UTF-8")
 # 
 # parametros_mapa <- list(
 #            ancho = 1200,
@@ -324,7 +324,7 @@ source('E:/programasR/boletin/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
 # promedio <- copernicus_temp$como_dataframe( promedio - 273.149993896484 )
 # # # - 273.149993896484
 # 
-# source('E:/programasR/boletin/parametros_ggplot_temp.R', encoding = "UTF-8")
+# source('E:/programasR/boletin_2.0/parametros_ggplot_temp.R', encoding = "UTF-8")
 # 
 # parametros_mapa <- list(
 #   ancho = 1200,
@@ -356,52 +356,51 @@ source('E:/programasR/boletin/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
 # lim.lat <- c(-25,25)
 #''nrt.cmems-du.eu/thredds/dodsC/METOFFICE-GLO-SST-L4-NRT-OBS-ANOM-V2'
 
-copernicus_temp_a <- Malla_escalar$new(    url = 'nrt.cmems-du.eu/thredds/dodsC/METOFFICE-GLO-SST-L4-NRT-OBS-ANOM-V2',
-                                       usuario = 'gramirez2',
-                                        contra = '$boletinDHN2018',
-                                       limites = data.frame( lon = c(270,292),
-                                                             lat = c(-20, 5)  ),
-                                         fecha = c( '2022-04-01' ,
-                                                    '2022-05-01' ),
-                                   profundidad = NaN ,
-                                      variable = 'sst_anomaly' ,
-                                 nombreslonlat = c( 'lon', 'lat' ) ,
-                                        origen = '1981-01-01' ,
-                                      unidad_t = 1 )
-
-temperatura_a <- copernicus_temp_a$bajar_datos()
+# copernicus_temp_a <- Malla_escalar$new(    url = 'nrt.cmems-du.eu/thredds/dodsC/METOFFICE-GLO-SST-L4-NRT-OBS-ANOM-V2',
+#                                        usuario = 'gramirez2',
+#                                         contra = '$boletinDHN2018',
+#                                        limites = data.frame( lon = c(120,292),
+#                                                              lat = c(-25, 25)  ),
+#                                          fecha = c( '2022-04-01' ,
+#                                                     '2022-05-01' ),
+#                                    profundidad = NaN ,
+#                                       variable = 'sst_anomaly' ,
+#                                  nombreslonlat = c( 'lon', 'lat' ) ,
+#                                         origen = '1981-01-01' ,
+#                                       unidad_t = 1 )
 # 
-promedio <- copernicus_temp_a$promedio_en_tiempo(temperatura_a)
-
-promedio <- copernicus_temp_a$como_dataframe( promedio )
-#
-
-source('E:/programasR/boletin/parametros_ggplot_temp_a.R', encoding = "UTF-8")
-
-parametros_mapa <- list(
-  ancho = 1200,
-  alto = 1200,
-  archivo_salida = archivo_salida,
-  titulo = titulo,
-  subtitulo = subtitulo,
-  creditos = creditos,
-  paleta_color = paleta_color,
-  niveles = niveles,
-  niveles_barra = niveles_barra,
-  costa = shore,
-  fronteras = fronteras,
-  marcas_x = marcas_x,
-  marcas_y = marcas_y,
-  etiquetas_x = etiquetas_x,
-  etiquetas_y = etiquetas_y,
-  unidades = unidades
-)
-
-source('E:/programasR/boletin/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
-mapa_temperatura_a <- Mapa_boletin$new( malla = list(promedio),
-                              parametros = parametros_mapa)
-
-mapa_temperatura_a$crear_mapa()
+# temperatura_a <- copernicus_temp_a$bajar_datos()
+# # 
+# promedio <- copernicus_temp_a$promedio_en_tiempo(temperatura_a)
+# 
+# promedio <- copernicus_temp_a$como_dataframe( promedio )
+# 
+# source('D:/programasR/boletin_2.0/parametros_ggplot_temp_a.R', encoding = "UTF-8")
+# 
+# parametros_mapa <- list(
+#   ancho = 2400,
+#   alto = 800,
+#   archivo_salida = archivo_salida,
+#   titulo = titulo,
+#   subtitulo = subtitulo,
+#   creditos = creditos,
+#   paleta_color = paleta_color,
+#   niveles = niveles,
+#   niveles_barra = niveles_barra,
+#   costa = shore,
+#   fronteras = fronteras,
+#   marcas_x = marcas_x,
+#   marcas_y = marcas_y,
+#   etiquetas_x = etiquetas_x,
+#   etiquetas_y = etiquetas_y,
+#   unidades = unidades
+# )
+# 
+# source('D:/programasR/boletin_2.0/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
+# mapa_temperatura_a <- Mapa_boletin$new( malla = list(promedio),
+#                               parametros = parametros_mapa)
+# 
+# mapa_temperatura_a$crear_mapa()
 
 # # ######################################
 # # 
@@ -422,80 +421,90 @@ mapa_temperatura_a$crear_mapa()
 
 # 
 # #################
-# copernicus_sla <- Malla_escalar$new(url='nrt.cmems-du.eu/thredds/dodsC/dataset-duacs-nrt-global-merged-allsat-phy-l4',
-#                                     usuario='gramirez2',
-#                                     contra='$boletinDHN2018',
-#                                     limites=data.frame( lon=c(120, 293),
-#                                                         lat=c(-20, 20)  ),
-#                                     fecha=c( '2022-04-04',
-#                                              '2022-05-04' ),
-#                                     profundidad = NaN,
-#                                     variable='sla',
-#                                     nombreslonlat = c('longitude', 'latitude') ,
-#                                     origen='1950-01-01',
-#                                     unidad_t = 86400)
-# 
-# sla <- copernicus_sla$bajar_datos()
-# promedio_sla <- raster::calc(sla*100, fun = mean, na.rm = T)
-# #####################
-# copernicus_ugosa <- Malla_escalar$new(url='nrt.cmems-du.eu/thredds/dodsC/dataset-duacs-nrt-global-merged-allsat-phy-l4',
-#                                     usuario='gramirez2',
-#                                     contra='$boletinDHN2018',
-#                                     limites=data.frame( lon=c(120, 293),
-#                                                         lat=c(-20, 20)  ),
-#                                     fecha=c( '2022-04-04',
-#                                              '2022-05-04' ),
-#                                     profundidad = NaN,
-#                                     variable='ugosa',
-#                                     nombreslonlat = c('longitude', 'latitude') ,
-#                                     origen='1950-01-01',
-#                                     unidad_t = 86400)
-# 
-# ugosa <- copernicus_ugosa$bajar_datos()
-# 
-# ########################################################
-# copernicus_vgosa <- Malla_escalar$new(url='nrt.cmems-du.eu/thredds/dodsC/dataset-duacs-nrt-global-merged-allsat-phy-l4',
-#                                       usuario='gramirez2',
-#                                       contra='$boletinDHN2018',
-#                                       limites=data.frame( lon=c(120, 293),
-#                                                           lat=c(-20, 20)  ),
-#                                       fecha=c( '2022-04-04',
-#                                                '2022-05-04' ),
-#                                       profundidad = NaN,
-#                                       variable='vgosa',
-#                                       nombreslonlat = c('longitude', 'latitude') ,
-#                                       origen='1950-01-01',
-#                                       unidad_t = 86400)
-# 
-# vgosa <- copernicus_vgosa$bajar_datos()
-# 
-# ########################################################
-# 
-# promedio_ugosa <- raster::calc(ugosa*100, fun = mean, na.rm = T)
-# 
-# promedio_vgosa <- raster::calc(vgosa*100, fun = mean, na.rm = T)
-# 
-# magnitud <- sqrt( promedio_ugosa^2 + promedio_vgosa^2 )
-# 
-# geostrofia <- raster::brick( promedio_ugosa/magnitud,
-#                              promedio_vgosa/magnitud  )
-# 
-# #########################################################
+copernicus_sla <- Malla_escalar$new(url='nrt.cmems-du.eu/thredds/dodsC/dataset-duacs-nrt-global-merged-allsat-phy-l4',
+                                    usuario='gramirez2',
+                                    contra='$boletinDHN2018',
+                                    limites=data.frame( lon=c(120, 293),
+                                                        lat=c(-25, 25)  ),
+                                    fecha=c( '2022-04-04',
+                                             '2022-05-04' ),
+                                    profundidad = NaN,
+                                    variable='sla',
+                                    nombreslonlat = c('longitude', 'latitude') ,
+                                    origen='1950-01-01',
+                                    unidad_t = 86400)
 
-# ##################
-# windows()
-# raster::plot(promedio,
-#              col = terrain.colors(15),
-#              colNA = 'darkgrey',
-#              ylim=c(-20,5))
-#############################
-# rasterVis::levelplot(promedio_sla,
-#                      margin  = FALSE,
-#                      contour = TRUE,
-#                      par.settings = tema_temp,
-#                      xlab='Longitud', ylab='Latitud', main=titulo,
-#                      scales = list(x = list(at=xmrks),
-#                                    y = list(at=ymrks) ),
-#                      at = cmrks,
-#                      colorkey=list(width = 1.0,
-#                                    labels = list(at = cmrks))) +
+sla <- copernicus_sla$bajar_datos()
+
+# #####################
+copernicus_ugosa <- Malla_escalar$new(url='nrt.cmems-du.eu/thredds/dodsC/dataset-duacs-nrt-global-merged-allsat-phy-l4',
+                                    usuario='gramirez2',
+                                    contra='$boletinDHN2018',
+                                    limites=data.frame( lon=c(120, 293),
+                                                        lat=c(-25, 25)  ),
+                                    fecha=c( '2022-04-04',
+                                             '2022-05-04' ),
+                                    profundidad = NaN,
+                                    variable='ugosa',
+                                    nombreslonlat = c('longitude', 'latitude') ,
+                                    origen='1950-01-01',
+                                    unidad_t = 86400)
+
+ugosa <- copernicus_ugosa$bajar_datos()
+
+# ########################################################
+copernicus_vgosa <- Malla_escalar$new(url='nrt.cmems-du.eu/thredds/dodsC/dataset-duacs-nrt-global-merged-allsat-phy-l4',
+                                      usuario='gramirez2',
+                                      contra='$boletinDHN2018',
+                                      limites=data.frame( lon=c(120, 293),
+                                                          lat=c(-25, 25)  ),
+                                      fecha=c( '2022-04-04',
+                                               '2022-05-04' ),
+                                      profundidad = NaN,
+                                      variable='vgosa',
+                                      nombreslonlat = c('longitude', 'latitude') ,
+                                      origen='1950-01-01',
+                                      unidad_t = 86400)
+
+vgosa <- copernicus_vgosa$bajar_datos()
+
+promedio_sla <- copernicus_sla$promedio_en_tiempo( sla)
+
+promedio_ugosa <- copernicus_ugosa$promedio_en_tiempo( ugosa )
+ 
+promedio_vgosa <- copernicus_vgosa$promedio_en_tiempo( vgosa )
+
+magnitud <- sqrt( promedio_ugosa^2 + promedio_vgosa^2 )
+
+lista_rst <- raster::brick( 100*promedio_sla, 10*promedio_ugosa/magnitud, 10*promedio_vgosa/magnitud  )
+
+sla_promedio <- as.data.frame(raster::rasterToPoints(lista_rst))
+
+##########################################################
+source('D:/programasR/boletin_2.0/parametros_ggplot_sla.R', encoding = "UTF-8")
+
+parametros_mapa <- list(
+  ancho = 2400,
+  alto = 800,
+  archivo_salida = archivo_salida,
+  titulo = titulo,
+  subtitulo = subtitulo,
+  creditos = creditos,
+  paleta_color = paleta_color,
+  niveles = niveles,
+  niveles_barra = niveles_barra,
+  costa = shore,
+  fronteras = fronteras,
+  marcas_x = marcas_x,
+  marcas_y = marcas_y,
+  etiquetas_x = etiquetas_x,
+  etiquetas_y = etiquetas_y,
+  unidades = unidades
+)
+###########
+source('D:/programasR/boletin_2.0/boletin_graficos_mapa_oop.R',encoding = "UTF-8")
+mapa_sla <- Mapa_boletin$new( malla = list( sla_promedio ),
+                              parametros = parametros_mapa )
+
+mapa_sla$crear_mapa()
+

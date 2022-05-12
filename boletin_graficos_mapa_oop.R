@@ -10,10 +10,9 @@ Mapa_boletin = setRefClass("Mapa_boletin",
 
 Mapa_boletin$methods(
   crear_mapa = function(){
-    if (length(.self$malla)==3){
+    if ( ncol( .self$malla[[1]] ) == 5 ){
         datos <- .self$malla[[1]]
-      datos$U <- .self$malla[[2]]$layer
-      datos$V <- .self$malla[[3]]$layer
+        names(datos) <- c('x','y','layer', 'U', 'V')
     }else{
       datos <- .self$malla[[1]]
       print(datos)
@@ -21,7 +20,7 @@ Mapa_boletin$methods(
     options(encoding = "UTF-8")
     print(.self$parametros$archivo_salida)
     pp <- ggplot2::ggplot( data = datos,
-                            aes( x = x,
+                           ggplot2::aes( x = x,
                                  y = y,
                                  z = layer,
                               fill = layer)
@@ -34,15 +33,24 @@ Mapa_boletin$methods(
       ggplot2::stat_contour( linetype = 1 ,
                     col = 'black' ,
                     breaks = .self$parametros$niveles)
-      if( length(.self$malla)==3 ){
-        
-          pp <-  pp + ggquiver::geom_quiver( aes( u = U, v = V ),
-                                             vecsize = 2,
-                                                size = 0.5  ) 
+      if( ncol(datos)==5 ){
+          ndts <- nrow(datos)
+          indc2 <- seq(1,ncol(datos), by = 15)
+          indc <- vector( mode = 'list', length = length(indc2) )
+          for (ii in indc2 ){
+            indc[[ii]] <- (ii-1)*ndts + seq(1, ndts, by = 30) 
+          }
+          indc <- do.call(what = rbind, args = indc)
+          campo <- datos[indc,]
+          pp <-  pp + ggquiver::geom_quiver(data = campo,
+                                            ggplot2::aes(x=x, y=y, u = U, v = V ),
+                                         vecsize = 5,
+                                            size = 1,
+                                     inherit.aes = FALSE) 
                                   }
       
 pp <- pp + ggplot2::geom_polygon( data = .self$parametros$costa,
-                     aes( x = long,
+            ggplot2::aes( x = long,
                           y = lat,
                       group = group ),
                     color = 'black',
@@ -51,7 +59,7 @@ pp <- pp + ggplot2::geom_polygon( data = .self$parametros$costa,
     
     for ( kk in 1:length( .self$parametros$fronteras )){
       f <- as.data.frame( .self$parametros$fronteras[[ kk ]] )
-      pp <- pp + ggplot2::geom_point(data = f, aes( x = X1,
+      pp <- pp + ggplot2::geom_point(data = f, ggplot2::aes( x = X1,
                                             y = X2 ),
                              col = 'grey30',
                              size = 0.05,
@@ -63,7 +71,7 @@ pp <- pp + ggplot2::geom_polygon( data = .self$parametros$costa,
                                    breaks = .self$parametros$marcas_x,
                                    labels = .self$parametros$etiquetas_x
     ) + 
-      ggplot2::scale_y_continuous( limits = c( -20, 2 ),
+      ggplot2::scale_y_continuous( limits = range( .self$parametros$marcas_y ),
                           expand = c( 0, 0 ),
                           breaks = .self$parametros$marcas_y,
                           labels = .self$parametros$etiquetas_y ) +
@@ -73,22 +81,19 @@ pp <- pp + ggplot2::geom_polygon( data = .self$parametros$costa,
                 subtitle = .self$parametros$subtitulo,
                  caption = .self$parametros$creditos
       ) +
-      ggplot2::theme( axis.title.x = element_text( size = 28,
-                                                  hjust = 0.5 ),
-             axis.title.y = element_text( size = 28,
-                                         hjust = 0.5 ),
-             axis.text = element_text( size = 28,
-                                     colour = 'black'),
-             title = element_text( size = 30 ),
-             plot.subtitle = element_text( size = 32 ),
-             plot.caption = element_text(  size = 22,
+      ggplot2::theme( axis.title.x = ggplot2::element_text( size = 28, hjust = 0.5 ),
+             axis.title.y = ggplot2::element_text( size = 28, hjust = 0.5 ),
+             axis.text = ggplot2::element_text( size = 24, colour = 'black'),
+             title = ggplot2::element_text( size = 30 ),
+             plot.subtitle = ggplot2::element_text( size = 32 ),
+             plot.caption = ggplot2::element_text(  size = 22,
                                           hjust = 0 )
       ) +
-      ggplot2::guides( fill = guide_colorbar(    barheight = unit(20, "cm"),
-                                         barwidth = unit(1.5,'cm'),
-                                      label.theme = element_text(size=26),
+      ggplot2::guides( fill = ggplot2::guide_colorbar(    barheight = ggplot2::unit(20, "cm"),
+                                         barwidth = ggplot2::unit(1.5,'cm'),
+                                      label.theme = ggplot2::element_text(size=26),
                                             title = .self$parametros$unidades,
-                                      title.theme = element_text(size=26)
+                                      title.theme = ggplot2::element_text(size=26)
       )
       )
     png(   width = .self$parametros$ancho,
